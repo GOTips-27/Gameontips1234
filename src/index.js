@@ -46,11 +46,12 @@ export default {
                 }
               }
             ).then(response => {
-              if (!response.ok) throw new Error("Fixtures API error");
-              return response.json();
-            })
-          )
-        );
+              if (!response.ok) {
+  throw new Error(await response.text());
+
+            
+          
+        
 
         const now = Date.now();
         const fixtures = results
@@ -67,13 +68,12 @@ export default {
           data: fixtures,
           count: fixtures.length
         });
-      } catch {
-        return Response.json(
-          { error: "Could not load upcoming matches" },
-          { status: 502 }
-        );
-      }
-    }
+      } catch (error) {
+  return Response.json(
+    { error: error.message },
+    { status: 502 }
+  );
+}
 
     if (url.pathname.startsWith("/api/")) {
       return Response.json({ error: "API route not found" }, {
