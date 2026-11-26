@@ -9,121 +9,143 @@
 
 <style>
 :root {
-  --bg: #080d18;
-  --panel: #111b2d;
-  --green: #22c55e;
-  --white: #f8fafc;
-  --muted: #a8b3c7;
+  --bg:#080d18;
+  --panel:#111b2d;
+  --green:#22c55e;
+  --white:#f8fafc;
+  --muted:#a8b3c7;
 }
-* { box-sizing: border-box; }
+* { box-sizing:border-box; }
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--white);
-  line-height: 1.6;
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  line-height:1.6;
 }
 header {
-  background: #101a2b;
-  padding: 18px 6%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  border-bottom: 1px solid #26344a;
+  background:#101a2b;
+  padding:18px 6%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:15px;
+  border-bottom:1px solid #26344a;
 }
-.logo { font-size: 23px; font-weight: bold; }
-.logo span { color: var(--green); }
-nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.logo { font-size:23px;font-weight:bold; }
+.logo span { color:var(--green); }
+nav { display:flex;gap:20px;flex-wrap:wrap; }
 nav a {
-  color: var(--white);
-  text-decoration: none;
-  font-size: 14px;
+  color:var(--white);
+  text-decoration:none;
+  font-size:14px;
 }
-nav a:hover { color: var(--green); }
+nav a:hover { color:var(--green); }
 .hero {
-  padding: 75px 7%;
-  text-align: center;
-  background: linear-gradient(135deg,#13233b,#080d18);
+  padding:75px 7%;
+  text-align:center;
+  background:linear-gradient(135deg,#13233b,#080d18);
 }
-.hero h1 { font-size: clamp(32px,6vw,55px); margin: 0 0 15px; }
-.hero h1 span { color: var(--green); }
-.hero p { color: var(--muted); max-width: 650px; margin: auto; }
+.hero h1 { font-size:clamp(32px,6vw,55px);margin:0 0 15px; }
+.hero h1 span { color:var(--green); }
+.hero p { color:var(--muted);max-width:650px;margin:auto; }
 .button {
-  display: inline-block;
-  background: var(--green);
-  color: #06120a;
-  padding: 12px 23px;
-  border-radius: 7px;
-  text-decoration: none;
-  font-weight: bold;
-  margin-top: 25px;
+  display:inline-block;
+  background:var(--green);
+  color:#06120a;
+  padding:12px 23px;
+  border-radius:7px;
+  text-decoration:none;
+  font-weight:bold;
+  margin-top:25px;
+  border:0;
+  cursor:pointer;
 }
-section { padding: 55px 7%; }
-.section-title { text-align: center; margin-bottom: 30px; }
-.section-title h2 { font-size: 30px; margin-bottom: 5px; }
-.section-title p { color: var(--muted); }
+section { padding:55px 7%; }
+.section-title { text-align:center;margin-bottom:30px; }
+.section-title h2 { font-size:30px;margin-bottom:5px; }
+.section-title p { color:var(--muted); }
 .cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
-  gap: 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
 }
 .card {
-  background: var(--panel);
-  border: 1px solid #26344a;
-  border-radius: 12px;
-  padding: 25px;
+  background:var(--panel);
+  border:1px solid #26344a;
+  border-radius:12px;
+  padding:25px;
 }
-.card h3 { margin-top: 0; color: var(--green); }
-.card p { color: var(--muted); }
+.card h3 { margin-top:0;color:var(--green); }
+.card p { color:var(--muted); }
 .tag {
-  display: inline-block;
-  background: #173b2a;
-  color: #86efac;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
+  display:inline-block;
+  background:#173b2a;
+  color:#86efac;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:12px;
 }
-.analysis { background: #0d1524; }
+.analysis { background:#0d1524; }
 .analysis-box {
-  max-width: 850px;
-  margin: auto;
-  background: var(--panel);
-  padding: 25px;
-  border-radius: 12px;
-  border: 1px solid #26344a;
+  max-width:850px;
+  margin:auto;
+  background:var(--panel);
+  padding:25px;
+  border-radius:12px;
+  border:1px solid #26344a;
 }
-.analysis-box h3 { color: var(--green); }
-.analysis-box li { margin: 10px 0; color: var(--muted); }
-.about { text-align: center; }
-.about p {
-  max-width: 750px;
-  margin: auto;
-  color: var(--muted);
-}
+.analysis-box h3 { color:var(--green); }
+.analysis-box li { margin:10px 0;color:var(--muted); }
+.about { text-align:center; }
+.about p { max-width:750px;margin:auto;color:var(--muted); }
 footer {
-  text-align: center;
-  padding: 30px 7%;
-  background: #050914;
-  color: var(--muted);
-  font-size: 13px;
+  text-align:center;
+  padding:30px 7%;
+  background:#050914;
+  color:var(--muted);
+  font-size:13px;
 }
-footer a { color: var(--green); }
 .match-card {
-  padding: 16px;
-  margin: 12px 0;
-  background: var(--panel);
-  border: 1px solid #26344a;
-  border-radius: 12px;
+  padding:18px;
+  margin:14px 0;
+  background:var(--panel);
+  border:1px solid #26344a;
+  border-radius:12px;
 }
-.match-card h3 { color: var(--green); margin-top: 0; }
-.match-card p { color: var(--muted); margin-bottom: 0; }
+.match-card h3 { color:var(--green);margin-top:0; }
+.match-card p { color:var(--muted); }
+.match-button {
+  background:var(--green);
+  color:#06120a;
+  padding:10px 16px;
+  border:0;
+  border-radius:7px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.match-button:hover { opacity:0.85; }
+#match-details {
+  display:none;
+  max-width:850px;
+  margin:25px auto;
+  padding:22px;
+  background:var(--panel);
+  border:1px solid var(--green);
+  border-radius:12px;
+}
+.detail-row {
+  padding:10px 0;
+  border-bottom:1px solid #26344a;
+}
+.detail-label { color:var(--muted); }
+#match-details h3 { color:var(--green); }
 @media(max-width:600px) {
-  header { justify-content: center; }
-  nav { justify-content: center; gap: 13px; }
-  .hero { padding: 55px 6%; }
-  section { padding: 40px 6%; }
+  header { justify-content:center; }
+  nav { justify-content:center;gap:13px; }
+  .hero { padding:55px 6%; }
+  section { padding:40px 6%; }
 }
 </style>
 </head>
@@ -141,6 +163,7 @@ footer a { color: var(--green); }
 </header>
 
 <main>
+
 <div class="hero" id="home">
   <h1>WELCOME TO <span>GAME ON TIPS</span></h1>
   <p>
@@ -193,13 +216,11 @@ footer a { color: var(--green); }
       <p>Review previous performances, consistency
       and suitability for the race.</p>
     </div>
-
     <div class="card">
       <h3>Jockey & Trainer</h3>
       <p>Study jockey and trainer records
       where reliable information is available.</p>
     </div>
-
     <div class="card">
       <h3>Race Conditions</h3>
       <p>Consider distance, course, draw, weight
@@ -241,6 +262,31 @@ footer a { color: var(--green); }
     research-based sports content.
   </p>
 </section>
+
+<!-- UPCOMING MATCHES -->
+<section id="upcoming-cricket">
+  <div class="section-title">
+    <h2>🏏 Today's Upcoming Cricket Matches</h2>
+    <p>Tap a match to explore its details.</p>
+  </div>
+  <div id="upcoming-matches">Loading upcoming matches...</div>
+</section>
+
+<!-- MATCH CENTRE -->
+<section id="match-centre">
+  <div id="match-details"></div>
+</section>
+
+<!-- LIVE SCORES -->
+<section id="live-cricket">
+  <div class="section-title">
+    <h2>🏏 Live Cricket Scores</h2>
+    <p>Live matches from around the world.</p>
+  </div>
+  <div id="cricket-status">Loading cricket scores...</div>
+  <div id="cricket-matches"></div>
+</section>
+
 </main>
 
 <footer>
@@ -252,24 +298,9 @@ footer a { color: var(--green); }
   <p>Please follow applicable local laws and gamble responsibly.</p>
 </footer>
 
-<!-- UPCOMING CRICKET MATCHES -->
-<section id="upcoming-cricket">
-  <h2>🏏 Today's Upcoming Cricket Matches</h2>
-  <p>Scheduled matches from around the world</p>
-  <div id="upcoming-matches">Loading upcoming matches...</div>
-</section>
-
-<!-- LIVE CRICKET SCORES -->
-<section id="live-cricket">
-  <h2>🏏 Live Cricket Scores</h2>
-  <p>Live matches from around the world</p>
-  <div id="cricket-status">Loading cricket scores...</div>
-  <div id="cricket-matches"></div>
-</section>
-
 <script>
 function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&":"&amp;",
     "<":"&lt;",
     ">":"&gt;",
@@ -278,7 +309,172 @@ function escapeHTML(value) {
   })[char]);
 }
 
-// LOAD LIVE CRICKET SCORES
+function formatDate(value) {
+  if (!value) return "Not available";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not available";
+  return date.toLocaleString("en-GB", {
+    dateStyle:"medium",
+    timeStyle:"short",
+    timeZone:"UTC"
+  }) + " UTC";
+}
+
+// UPCOMING MATCHES
+async function loadUpcomingMatches() {
+  const box = document.getElementById("upcoming-matches");
+
+  try {
+    const response = await fetch("/api/cricket/upcoming");
+    if (!response.ok) throw new Error("Could not load matches");
+
+    const result = await response.json();
+    const matches = result.data || [];
+
+    if (matches.length === 0) {
+      box.textContent = "No upcoming matches scheduled today.";
+      return;
+    }
+
+    box.innerHTML = matches.map(match => `
+      <div class="match-card">
+        <h3>
+          ${escapeHTML(match.home?.name || "Team 1")}
+          vs
+          ${escapeHTML(match.away?.name || "Team 2")}
+        </h3>
+        <p>${escapeHTML(match.league?.name || "Cricket")}</p>
+        <p>${escapeHTML(formatDate(match.startTime))}</p>
+        <button class="match-button"
+          data-match-id="${escapeHTML(match.id)}">
+          View Match Details
+        </button>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    box.textContent = "Upcoming matches are temporarily unavailable.";
+  }
+}
+
+// INDIVIDUAL MATCH DETAILS
+async function loadMatchDetails(matchId) {
+  const box = document.getElementById("match-details");
+
+  box.style.display = "block";
+  box.innerHTML = "<p>Loading match details...</p>";
+  box.scrollIntoView({ behavior:"smooth", block:"start" });
+
+  try {
+    const response = await fetch(
+      "/api/cricket/match?id=" + encodeURIComponent(matchId)
+    );
+
+    if (!response.ok) {
+      throw new Error("Could not retrieve match details");
+    }
+
+    const result = await response.json();
+    const match = result.data;
+
+    if (!match) throw new Error("Match information unavailable");
+
+    const home = match.home?.name || "Team 1";
+    const away = match.away?.name || "Team 2";
+
+    const homeScore = match.homeScore?.current;
+    const awayScore = match.awayScore?.current;
+
+    box.innerHTML = `
+      <h2>🏏 Match Centre</h2>
+      <h3>${escapeHTML(home)} vs ${escapeHTML(away)}</h3>
+
+      <div class="detail-row">
+        <span class="detail-label">Competition:</span>
+        ${escapeHTML(match.league?.name || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Status:</span>
+        ${escapeHTML(match.status?.description || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Date and time:</span>
+        ${escapeHTML(formatDate(match.startTime))}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Venue:</span>
+        ${escapeHTML(match.venue?.name || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">City:</span>
+        ${escapeHTML(match.venue?.city || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Country:</span>
+        ${escapeHTML(match.venue?.country?.name || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Match format:</span>
+        ${escapeHTML(match.matchFormat || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Score:</span>
+        ${homeScore != null || awayScore != null
+          ? escapeHTML(home) + ": " + escapeHTML(homeScore ?? "—") +
+            " | " + escapeHTML(away) + ": " + escapeHTML(awayScore ?? "—")
+          : "Score not available yet"}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Toss:</span>
+        ${escapeHTML(match.toss || "Not available yet")}
+      </div>
+
+      <p style="color:#a8b3c7;font-size:13px;">
+        Match information is shown as supplied by the data provider.
+        Some details may not be available before the match starts.
+      </p>
+
+      <button class="match-button" id="close-details">
+        Close Match Details
+      </button>
+    `;
+
+    document.getElementById("close-details").addEventListener("click", () => {
+      box.style.display = "none";
+    });
+
+  } catch (error) {
+    box.innerHTML = `
+      <h3>Match details unavailable</h3>
+      <p>Please try again later.</p>
+      <button class="match-button" id="close-details">
+        Close
+      </button>
+    `;
+
+    document.getElementById("close-details").addEventListener("click", () => {
+      box.style.display = "none";
+    });
+  }
+}
+
+// CLICK A MATCH
+document.getElementById("upcoming-matches").addEventListener("click", event => {
+  const button = event.target.closest("[data-match-id]");
+  if (button) {
+    loadMatchDetails(button.dataset.matchId);
+  }
+});
+
+// LIVE CRICKET SCORES
 async function loadCricketScores() {
   const status = document.getElementById("cricket-status");
   const matches = document.getElementById("cricket-matches");
@@ -301,51 +497,17 @@ async function loadCricketScores() {
     matches.innerHTML = games.map(match => `
       <div class="match-card">
         <h3>${escapeHTML(match.name || match.title || "Cricket match")}</h3>
-        <p>${escapeHTML(match.status || match.status_str || "Live match")}</p>
+        <p>${escapeHTML(match.status?.description || match.status || "Live match")}</p>
       </div>
     `).join("");
+
   } catch (error) {
     status.textContent = "Live scores are temporarily unavailable.";
   }
 }
 
-// LOAD TODAY'S UPCOMING MATCHES
-async function loadUpcomingMatches() {
-  const box = document.getElementById("upcoming-matches");
-
-  try {
-    const response = await fetch("/api/cricket/upcoming");
-    if (!response.ok) throw new Error("Failed to load matches");
-
-    const result = await response.json();
-    const matches = result.data || [];
-
-    if (matches.length === 0) {
-      box.textContent = "No upcoming matches scheduled today.";
-      return;
-    }
-
-    box.innerHTML = matches.map(match => `
-      <div class="match-card">
-        <h3>
-          ${escapeHTML(match.home?.name || "Team 1")}
-          vs
-          ${escapeHTML(match.away?.name || "Team 2")}
-        </h3>
-        <p>${escapeHTML(match.league?.name || "Cricket")}</p>
-        <p>${new Date(match.startTime).toLocaleString("en-GB", {
-          dateStyle: "medium",
-          timeStyle: "short"
-        })}</p>
-      </div>
-    `).join("");
-  } catch (error) {
-    box.textContent = "Upcoming matches are temporarily unavailable.";
-  }
-}
-
-loadCricketScores();
 loadUpcomingMatches();
+loadCricketScores();
 
 // Refresh live scores every 60 seconds
 setInterval(loadCricketScores, 60000);
