@@ -85,9 +85,7 @@ section { padding: 55px 7%; }
   border-radius: 20px;
   font-size: 12px;
 }
-.analysis {
-  background: #0d1524;
-}
+.analysis { background: #0d1524; }
 .analysis-box {
   max-width: 850px;
   margin: auto;
@@ -112,6 +110,15 @@ footer {
   font-size: 13px;
 }
 footer a { color: var(--green); }
+.match-card {
+  padding: 16px;
+  margin: 12px 0;
+  background: var(--panel);
+  border: 1px solid #26344a;
+  border-radius: 12px;
+}
+.match-card h3 { color: var(--green); margin-top: 0; }
+.match-card p { color: var(--muted); margin-bottom: 0; }
 @media(max-width:600px) {
   header { justify-content: center; }
   nav { justify-content: center; gap: 13px; }
@@ -245,7 +252,15 @@ footer a { color: var(--green); }
   <p>Please follow applicable local laws and gamble responsibly.</p>
 </footer>
 
-<section id="live-cricket" style="padding:40px 20px;max-width:1100px;margin:auto;">
+<!-- UPCOMING CRICKET MATCHES -->
+<section id="upcoming-cricket">
+  <h2>🏏 Today's Upcoming Cricket Matches</h2>
+  <p>Scheduled matches from around the world</p>
+  <div id="upcoming-matches">Loading upcoming matches...</div>
+</section>
+
+<!-- LIVE CRICKET SCORES -->
+<section id="live-cricket">
   <h2>🏏 Live Cricket Scores</h2>
   <p>Live matches from around the world</p>
   <div id="cricket-status">Loading cricket scores...</div>
@@ -253,6 +268,17 @@ footer a { color: var(--green); }
 </section>
 
 <script>
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[char]);
+}
+
+// LOAD LIVE CRICKET SCORES
 async function loadCricketScores() {
   const status = document.getElementById("cricket-status");
   const matches = document.getElementById("cricket-matches");
@@ -266,13 +292,14 @@ async function loadCricketScores() {
 
     if (games.length === 0) {
       status.textContent = "No live cricket matches right now. Please check again soon.";
+      matches.innerHTML = "";
       return;
     }
 
     status.textContent = games.length + " live match(es)";
 
     matches.innerHTML = games.map(match => `
-      <div style="padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:12px;">
+      <div class="match-card">
         <h3>${escapeHTML(match.name || match.title || "Cricket match")}</h3>
         <p>${escapeHTML(match.status || match.status_str || "Live match")}</p>
       </div>
@@ -282,13 +309,45 @@ async function loadCricketScores() {
   }
 }
 
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  })[char]);
+// LOAD TODAY'S UPCOMING MATCHES
+async function loadUpcomingMatches() {
+  const box = document.getElementById("upcoming-matches");
+
+  try {
+    const response = await fetch("/api/cricket/upcoming");
+    if (!response.ok) throw new Error("Failed to load matches");
+
+    const result = await response.json();
+    const matches = result.data || [];
+
+    if (matches.length === 0) {
+      box.textContent = "No upcoming matches scheduled today.";
+      return;
+    }
+
+    box.innerHTML = matches.map(match => `
+      <div class="match-card">
+        <h3>
+          ${escapeHTML(match.home?.name || "Team 1")}
+          vs
+          ${escapeHTML(match.away?.name || "Team 2")}
+        </h3>
+        <p>${escapeHTML(match.league?.name || "Cricket")}</p>
+        <p>${new Date(match.startTime).toLocaleString("en-GB", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        })}</p>
+      </div>
+    `).join("");
+  } catch (error) {
+    box.textContent = "Upcoming matches are temporarily unavailable.";
+  }
 }
 
 loadCricketScores();
+loadUpcomingMatches();
+
+// Refresh live scores every 60 seconds
 setInterval(loadCricketScores, 60000);
 </script>
 
