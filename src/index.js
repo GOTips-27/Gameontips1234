@@ -23,13 +23,9 @@ export default {
           }
         );
 
-        const data = await response.text();
-
-        return new Response(data, {
+        return new Response(await response.text(), {
           status: response.status,
-          headers: {
-            "Content-Type": "application/json"
-          }
+          headers: { "Content-Type": "application/json" }
         });
       } catch (error) {
         return Response.json(
@@ -73,6 +69,40 @@ export default {
         return Response.json({
           data: fixtures,
           count: fixtures.length
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error.message },
+          { status: 502 }
+        );
+      }
+    }
+
+    // INDIVIDUAL CRICKET MATCH DETAILS
+    if (url.pathname === "/api/cricket/match") {
+      try {
+        const matchId = url.searchParams.get("id");
+
+        if (!matchId || !/^\d+$/.test(matchId) || Number(matchId) < 1) {
+          return Response.json(
+            { error: "Please provide a valid match ID" },
+            { status: 400 }
+          );
+        }
+
+        const response = await fetch(
+          `https://api.sportsapi.app/v2/fixtures/${matchId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${env.SPORTS_API_KEY}`,
+              Accept: "application/json"
+            }
+          }
+        );
+
+        return new Response(await response.text(), {
+          status: response.status,
+          headers: { "Content-Type": "application/json" }
         });
       } catch (error) {
         return Response.json(
