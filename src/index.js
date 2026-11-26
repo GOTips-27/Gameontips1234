@@ -11,20 +11,27 @@ export default {
     }
 
     if (url.pathname === "/api/cricket/live") {
-      const response = await fetch(
-        "https://api.sportsapi.app/v2/livescores?sport=cricket",
-        {
-          headers: {
-            Authorization: `Bearer ${env.SPORTS_API_KEY}`,
-            Accept: "application/json"
+      try {
+        const response = await fetch(
+          "https://api.sportsapi.app/v2/livescores?sport=cricket",
+          {
+            headers: {
+              Authorization: `Bearer ${env.SPORTS_API_KEY}`,
+              Accept: "application/json"
+            }
           }
-        }
-      );
+        );
 
-      return new Response(await response.text(), {
-        status: response.status,
-        headers: { "Content-Type": "application/json" }
-      });
+        return new Response(await response.text(), {
+          status: response.status,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error.message },
+          { status: 502 }
+        );
+      }
     }
 
     if (url.pathname === "/api/cricket/upcoming") {
@@ -36,8 +43,8 @@ export default {
         });
 
         const results = await Promise.all(
-          dates.map(date =>
-            fetch(
+          dates.map(async date => {
+            const response = await fetch(
               `https://api.sportsapi.app/v2/fixtures?date=${date}&sport=cricket`,
               {
                 headers: {
@@ -45,15 +52,18 @@ export default {
                   Accept: "application/json"
                 }
               }
-            ).then(response => {
-              if (!response.ok) {
-  throw new Error(await response.text());
+            );
 
-            
-          
-        
+            if (!response.ok) {
+              throw new Error(await response.text());
+            }
+
+            return response.json();
+          })
+        );
 
         const now = Date.now();
+
         const fixtures = results
           .flatMap(result => result.data || [])
           .filter(match =>
@@ -69,16 +79,18 @@ export default {
           count: fixtures.length
         });
       } catch (error) {
-  return Response.json(
-    { error: error.message },
-    { status: 502 }
-  );
-}
+        return Response.json(
+          { error: error.message },
+          { status: 502 }
+        );
+      }
+    }
 
     if (url.pathname.startsWith("/api/")) {
-      return Response.json({ error: "API route not found" }, {
-        status: 404
-      });
+      return Response.json(
+        { error: "API route not found" },
+        { status: 404 }
+      );
     }
 
     return env.ASSETS.fetch(request);
