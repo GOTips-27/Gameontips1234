@@ -4,31 +4,36 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/cricket/live") {
-      if (request.method !== "GET") {
-        return Response.json({ error: "Method not allowed" }, { status: 405 });
-      }
-
       if (!env.SPORTS_API_KEY) {
-        return Response.json({ error: "API key is not configured" }, { status: 500 });
+        return Response.json(
+          { error: "SportsAPI key is missing" },
+          { status: 500 }
+        );
       }
 
-      const response = await fetch(
-        "https://api.sportsapi.app/v2/livescores?sport=cricket",
-        {
-          headers: {
-            Authorization: `Bearer ${env.SPORTS_API_KEY}`,
-            Accept: "application/json"
+      try {
+        const apiResponse = await fetch(
+          "https://api.sportsapi.app/v2/livescores?sport=cricket",
+          {
+            headers: {
+              Authorization: `Bearer ${env.SPORTS_API_KEY}`,
+              Accept: "application/json"
+            }
           }
-        }
-      );
+        );
 
-      return new Response(response.body, {
-        status: response.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          "Cache-Control": "no-store"
-        }
-      });
+        const data = await apiResponse.json();
+
+        return Response.json(data, {
+          status: apiResponse.status,
+          headers: { "Cache-Control": "no-store" }
+        });
+      } catch {
+        return Response.json(
+          { error: "Could not connect to SportsAPI" },
+          { status: 502 }
+        );
+      }
     }
 
     if (url.pathname.startsWith("/api/")) {
@@ -38,4 +43,3 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
-
