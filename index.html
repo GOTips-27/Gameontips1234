@@ -124,6 +124,7 @@ footer {
   border-radius:7px;
   font-weight:bold;
   cursor:pointer;
+  margin:5px 5px 5px 0;
 }
 .match-button:hover { opacity:0.85; }
 #match-details {
@@ -141,6 +142,35 @@ footer {
 }
 .detail-label { color:var(--muted); }
 #match-details h3 { color:var(--green); }
+#scorecard-details {
+  margin-top:20px;
+}
+.scorecard-innings {
+  background:#0d1524;
+  border:1px solid #26344a;
+  border-radius:10px;
+  padding:15px;
+  margin:15px 0;
+  overflow-wrap:anywhere;
+}
+.scorecard-innings h4 {
+  color:var(--green);
+  margin-top:0;
+}
+.scorecard-row {
+  padding:8px 0;
+  border-bottom:1px solid #26344a;
+}
+.scorecard-row:last-child { border-bottom:0; }
+.scorecard-key {
+  color:var(--muted);
+  font-weight:bold;
+}
+.scorecard-nested {
+  margin:8px 0 8px 12px;
+  padding-left:12px;
+  border-left:2px solid #26344a;
+}
 @media(max-width:600px) {
   header { justify-content:center; }
   nav { justify-content:center;gap:13px; }
@@ -263,7 +293,6 @@ footer {
   </p>
 </section>
 
-<!-- UPCOMING MATCHES -->
 <section id="upcoming-cricket">
   <div class="section-title">
     <h2>🏏 Today's Upcoming Cricket Matches</h2>
@@ -272,12 +301,10 @@ footer {
   <div id="upcoming-matches">Loading upcoming matches...</div>
 </section>
 
-<!-- MATCH CENTRE -->
 <section id="match-centre">
   <div id="match-details"></div>
 </section>
 
-<!-- LIVE SCORES -->
 <section id="live-cricket">
   <div class="section-title">
     <h2>🏏 Live Cricket Scores</h2>
@@ -320,6 +347,56 @@ function formatDate(value) {
   }) + " UTC";
 }
 
+// Display scorecard data without assuming unavailable fields
+function renderScorecardValue(value, depth = 0) {
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "";
+
+    return value.map((item, index) => `
+      <div class="scorecard-nested">
+        ${typeof item === "object" && item !== null
+          ? renderScorecardValue(item, depth + 1)
+          : `<div class="scorecard-row">${escapeHTML(item)}</div>`}
+      </div>
+    `).join("");
+  }
+
+  if (typeof value === "object") {
+    return Object.entries(value).map(([key, item]) => {
+      if (item === null || item === undefined || item === "") {
+        return "";
+      }
+
+      const label = key
+        .replace(/([A-Z])/g, " $1")
+        .replace(/[_-]/g, " ")
+        .replace(/^./, char => char.toUpperCase());
+
+      if (typeof item === "object") {
+        return `
+          <div class="scorecard-row">
+            <div class="scorecard-key">${escapeHTML(label)}</div>
+            ${renderScorecardValue(item, depth + 1)}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="scorecard-row">
+          <span class="scorecard-key">${escapeHTML(label)}:</span>
+          ${escapeHTML(item)}
+        </div>
+      `;
+    }).join("");
+  }
+
+  return escapeHTML(value);
+}
+
 // UPCOMING MATCHES
 async function loadUpcomingMatches() {
   const box = document.getElementById("upcoming-matches");
@@ -354,6 +431,58 @@ async function loadUpcomingMatches() {
 
   } catch (error) {
     box.textContent = "Upcoming matches are temporarily unavailable.";
+  }
+}
+
+// LOAD FULL SCORECARD
+async function loadScorecard(matchId) {
+  const box = document.getElementById("scorecard-details");
+
+  box.innerHTML = "<p>Loading full scorecard...</p>";
+
+  try {
+    const response = await fetch(
+      "/api/cricket/scorecard?id=" + encodeURIComponent(matchId)
+    );
+
+    if (!response.ok) {
+      throw new Error("Could not retrieve scorecard");
+    }
+
+    const result = await response.json();
+    const innings = result.data?.innings || [];
+
+    if (!Array.isArray(innings) || innings.length === 0) {
+      box.innerHTML = `
+        <div class="scorecard-innings">
+          <h4>🏏 Full Scorecard</h4>
+          <p>Scorecard is not available yet.</p>
+          <p style="color:#a8b3c7;font-size:13px;">
+            Innings information will appear here when supplied
+            by the data provider.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    box.innerHTML = `
+      <h3>🏏 Full Scorecard</h3>
+      ${innings.map((inning, index) => `
+        <div class="scorecard-innings">
+          <h4>Innings ${index + 1}</h4>
+          ${renderScorecardValue(inning)}
+        </div>
+      `).join("")}
+    `;
+
+  } catch (error) {
+    box.innerHTML = `
+      <div class="scorecard-innings">
+        <h4>Scorecard unavailable</h4>
+        <p>Please try again later.</p>
+      </div>
+    `;
   }
 }
 
@@ -442,10 +571,22 @@ async function loadMatchDetails(matchId) {
         Some details may not be available before the match starts.
       </p>
 
+      <button class="match-button" id="show-scorecard">
+        View Full Scorecard
+      </button>
+
+      <div id="scorecard-details"></div>
+
+      <br>
+
       <button class="match-button" id="close-details">
         Close Match Details
       </button>
     `;
+
+    document.getElementById("show-scorecard").addEventListener("click", () => {
+      loadScorecard(matchId);
+    });
 
     document.getElementById("close-details").addEventListener("click", () => {
       box.style.display = "none";
@@ -497,7 +638,7 @@ async function loadCricketScores() {
     matches.innerHTML = games.map(match => `
       <div class="match-card">
         <h3>${escapeHTML(match.name || match.title || "Cricket match")}</h3>
-        <p>${escapeHTML(match.status?.description || match.status || "Live match")}</p>
+        <p>${escapeHTML(match.status?.description || "Live match")}</p>
       </div>
     `).join("");
 
