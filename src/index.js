@@ -112,6 +112,40 @@ export default {
       }
     }
 
+    // CRICKET FULL SCORECARD
+    if (url.pathname === "/api/cricket/scorecard") {
+      try {
+        const matchId = url.searchParams.get("id");
+
+        if (!matchId || !/^\d+$/.test(matchId) || Number(matchId) < 1) {
+          return Response.json(
+            { error: "Please provide a valid match ID" },
+            { status: 400 }
+          );
+        }
+
+        const response = await fetch(
+          `https://api.sportsapi.app/v2/fixtures/${matchId}/scorecard`,
+          {
+            headers: {
+              Authorization: `Bearer ${env.SPORTS_API_KEY}`,
+              Accept: "application/json"
+            }
+          }
+        );
+
+        return new Response(await response.text(), {
+          status: response.status,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        return Response.json(
+          { error: error.message },
+          { status: 502 }
+        );
+      }
+    }
+
     // UNKNOWN API ROUTES
     if (url.pathname.startsWith("/api/")) {
       return Response.json(
