@@ -245,5 +245,52 @@ footer a { color: var(--green); }
   <p>Please follow applicable local laws and gamble responsibly.</p>
 </footer>
 
+<section id="live-cricket" style="padding:40px 20px;max-width:1100px;margin:auto;">
+  <h2>🏏 Live Cricket Scores</h2>
+  <p>Live matches from around the world</p>
+  <div id="cricket-status">Loading cricket scores...</div>
+  <div id="cricket-matches"></div>
+</section>
+
+<script>
+async function loadCricketScores() {
+  const status = document.getElementById("cricket-status");
+  const matches = document.getElementById("cricket-matches");
+
+  try {
+    const response = await fetch("/api/cricket/live");
+    if (!response.ok) throw new Error("Could not load scores");
+
+    const result = await response.json();
+    const games = result.data || [];
+
+    if (games.length === 0) {
+      status.textContent = "No live cricket matches right now. Please check again soon.";
+      return;
+    }
+
+    status.textContent = games.length + " live match(es)";
+
+    matches.innerHTML = games.map(match => `
+      <div style="padding:16px;margin:12px 0;border:1px solid #ddd;border-radius:12px;">
+        <h3>${escapeHTML(match.name || match.title || "Cricket match")}</h3>
+        <p>${escapeHTML(match.status || match.status_str || "Live match")}</p>
+      </div>
+    `).join("");
+  } catch (error) {
+    status.textContent = "Live scores are temporarily unavailable.";
+  }
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
+
+loadCricketScores();
+setInterval(loadCricketScores, 60000);
+</script>
+
 </body>
 </html>
