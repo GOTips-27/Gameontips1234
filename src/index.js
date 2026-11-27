@@ -145,6 +145,32 @@ export default {
         );
       }
     }
+    // HORSE RACING: YESTERDAY'S RESULTS
+if (url.pathname === "/api/horse/results") {
+  try {
+    const response = await fetch(
+      "https://api.apihorseracing.com/v1/results/yesterday",
+      {
+        headers: {
+          "X-API-Key": env.HORSE_RACING_API_KEY,
+          Accept: "application/json"
+        }
+      }
+    );
+
+    return new Response(await response.text(), {
+      status: response.status,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+  } catch (error) {
+    return Response.json(
+      { error: error.message },
+      { status: 502 }
+    );
+  }
+}
 // HORSE RACING: COUNTRY COVERAGE
 if (url.pathname === "/api/horse/countries") {
   try {
