@@ -3,12 +3,12 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith("/api/") && !env.SPORTS_API_KEY) {
-      return Response.json(
-        { error: "SportsAPI key is missing" },
-        { status: 500 }
-      );
-    }
+    if (url.pathname.startsWith("/api/cricket/") && !env.SPORTS_API_KEY) {
+  return Response.json(
+    { error: "SportsAPI key is missing" },
+    { status: 500 }
+  );
+}
 
     // LIVE CRICKET SCORES
     if (url.pathname === "/api/cricket/live") {
@@ -145,6 +145,13 @@ export default {
         );
       }
     }
+    // CHECK HORSE RACING API KEY
+if (url.pathname.startsWith("/api/horse/") && !env.HORSE_RACING_API_KEY) {
+  return Response.json(
+    { error: "Horse Racing API key is missing" },
+    { status: 500 }
+  );
+}
     // HORSE RACING: YESTERDAY'S RESULTS
 if (url.pathname === "/api/horse/results") {
   try {
