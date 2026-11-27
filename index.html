@@ -142,9 +142,7 @@ footer {
 }
 .detail-label { color:var(--muted); }
 #match-details h3 { color:var(--green); }
-#scorecard-details {
-  margin-top:20px;
-}
+#scorecard-details { margin-top:20px; }
 .scorecard-innings {
   background:#0d1524;
   border:1px solid #26344a;
@@ -171,11 +169,72 @@ footer {
   padding-left:12px;
   border-left:2px solid #26344a;
 }
+
+/* LIVE SCORE DESIGN */
+.live-match {
+  background:var(--panel);
+  border:1px solid #26344a;
+  border-radius:12px;
+  padding:20px;
+  margin:16px 0;
+}
+.live-match h3 {
+  color:var(--green);
+  margin:0 0 8px;
+}
+.live-meta {
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:15px;
+}
+.live-teams {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.live-team {
+  background:#0d1524;
+  border:1px solid #26344a;
+  border-radius:9px;
+  padding:13px;
+  min-width:0;
+}
+.live-team-name {
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+.live-team-total {
+  color:var(--green);
+  font-size:23px;
+  font-weight:bold;
+  margin-top:5px;
+}
+.live-innings {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:7px;
+}
+.live-status {
+  display:inline-block;
+  background:#173b2a;
+  color:#86efac;
+  border-radius:20px;
+  padding:5px 12px;
+  font-size:12px;
+  margin-top:14px;
+}
+.live-refresh {
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+  margin-top:15px;
+}
 @media(max-width:600px) {
   header { justify-content:center; }
   nav { justify-content:center;gap:13px; }
   .hero { padding:55px 6%; }
   section { padding:40px 6%; }
+  .live-teams { grid-template-columns:1fr; }
 }
 </style>
 </head>
@@ -217,14 +276,12 @@ footer {
       <p>Team strengths, recent form, pitch conditions
       and match factors.</p>
     </div>
-
     <div class="card">
       <span class="tag">PLAYER INSIGHTS</span>
       <h3>Top Players</h3>
       <p>Explore batting, bowling, all-rounder
       and player performance information.</p>
     </div>
-
     <div class="card">
       <span class="tag">TEAM RESEARCH</span>
       <h3>Team Comparison</h3>
@@ -264,7 +321,6 @@ footer {
     <h2>Our Analysis Process</h2>
     <p>Research first. Review carefully. Publish responsibly.</p>
   </div>
-
   <div class="analysis-box">
     <h3>How GameOnTips1234 will work</h3>
     <ol>
@@ -312,6 +368,7 @@ footer {
   </div>
   <div id="cricket-status">Loading cricket scores...</div>
   <div id="cricket-matches"></div>
+  <div class="live-refresh" id="live-refresh"></div>
 </section>
 
 </main>
@@ -356,7 +413,7 @@ function renderScorecardValue(value, depth = 0) {
   if (Array.isArray(value)) {
     if (value.length === 0) return "";
 
-    return value.map((item, index) => `
+    return value.map(item => `
       <div class="scorecard-nested">
         ${typeof item === "object" && item !== null
           ? renderScorecardValue(item, depth + 1)
@@ -437,7 +494,6 @@ async function loadUpcomingMatches() {
 // LOAD FULL SCORECARD
 async function loadScorecard(matchId) {
   const box = document.getElementById("scorecard-details");
-
   box.innerHTML = "<p>Loading full scorecard...</p>";
 
   try {
@@ -445,9 +501,7 @@ async function loadScorecard(matchId) {
       "/api/cricket/scorecard?id=" + encodeURIComponent(matchId)
     );
 
-    if (!response.ok) {
-      throw new Error("Could not retrieve scorecard");
-    }
+    if (!response.ok) throw new Error("Could not retrieve scorecard");
 
     const result = await response.json();
     const innings = result.data?.innings || [];
@@ -499,9 +553,7 @@ async function loadMatchDetails(matchId) {
       "/api/cricket/match?id=" + encodeURIComponent(matchId)
     );
 
-    if (!response.ok) {
-      throw new Error("Could not retrieve match details");
-    }
+    if (!response.ok) throw new Error("Could not retrieve match details");
 
     const result = await response.json();
     const match = result.data;
@@ -510,7 +562,6 @@ async function loadMatchDetails(matchId) {
 
     const home = match.home?.name || "Team 1";
     const away = match.away?.name || "Team 2";
-
     const homeScore = match.homeScore?.current;
     const awayScore = match.awayScore?.current;
 
@@ -522,37 +573,30 @@ async function loadMatchDetails(matchId) {
         <span class="detail-label">Competition:</span>
         ${escapeHTML(match.league?.name || "Not available")}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Status:</span>
         ${escapeHTML(match.status?.description || "Not available")}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Date and time:</span>
         ${escapeHTML(formatDate(match.startTime))}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Venue:</span>
         ${escapeHTML(match.venue?.name || "Not available")}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">City:</span>
         ${escapeHTML(match.venue?.city || "Not available")}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Country:</span>
         ${escapeHTML(match.venue?.country?.name || "Not available")}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Match format:</span>
         ${escapeHTML(match.matchFormat || "Not available")}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Score:</span>
         ${homeScore != null || awayScore != null
@@ -560,10 +604,15 @@ async function loadMatchDetails(matchId) {
             " | " + escapeHTML(away) + ": " + escapeHTML(awayScore ?? "—")
           : "Score not available yet"}
       </div>
-
       <div class="detail-row">
         <span class="detail-label">Toss:</span>
-        ${escapeHTML(match.toss || "Not available yet")}
+        ${escapeHTML(
+          typeof match.toss === "object" && match.toss
+            ? (match.toss.winner === "home" ? home :
+               match.toss.winner === "away" ? away : "Not available") +
+              (match.toss.decision ? " elected to " + match.toss.decision : "")
+            : match.toss || "Not available yet"
+        )}
       </div>
 
       <p style="color:#a8b3c7;font-size:13px;">
@@ -574,11 +623,8 @@ async function loadMatchDetails(matchId) {
       <button class="match-button" id="show-scorecard">
         View Full Scorecard
       </button>
-
       <div id="scorecard-details"></div>
-
       <br>
-
       <button class="match-button" id="close-details">
         Close Match Details
       </button>
@@ -596,9 +642,7 @@ async function loadMatchDetails(matchId) {
     box.innerHTML = `
       <h3>Match details unavailable</h3>
       <p>Please try again later.</p>
-      <button class="match-button" id="close-details">
-        Close
-      </button>
+      <button class="match-button" id="close-details">Close</button>
     `;
 
     document.getElementById("close-details").addEventListener("click", () => {
@@ -610,15 +654,45 @@ async function loadMatchDetails(matchId) {
 // CLICK A MATCH
 document.getElementById("upcoming-matches").addEventListener("click", event => {
   const button = event.target.closest("[data-match-id]");
-  if (button) {
-    loadMatchDetails(button.dataset.matchId);
-  }
+  if (button) loadMatchDetails(button.dataset.matchId);
 });
+
+// FORMAT CRICKET INNINGS
+function formatTeamInnings(score) {
+  const innings = score?.innings || {};
+  const entries = Object.entries(innings);
+
+  if (entries.length === 0) {
+    return '<div class="live-innings">Yet to bat</div>';
+  }
+
+  return entries.map(([key, inning]) => {
+    const number = key.replace("inning", "");
+    const label = number === "1" ? "1st innings" :
+                  number === "2" ? "2nd innings" :
+                  "Innings " + number;
+
+    const runs = inning.runs ?? "—";
+    const wickets = inning.wickets ?? "—";
+    const overs = inning.overs != null
+      ? inning.overs + " overs"
+      : "Overs unavailable";
+
+    return `
+      <div class="live-innings">
+        ${escapeHTML(label)}:
+        <strong>${escapeHTML(runs)}/${escapeHTML(wickets)}</strong>
+        (${escapeHTML(overs)})
+      </div>
+    `;
+  }).join("");
+}
 
 // LIVE CRICKET SCORES
 async function loadCricketScores() {
   const status = document.getElementById("cricket-status");
   const matches = document.getElementById("cricket-matches");
+  const refresh = document.getElementById("live-refresh");
 
   try {
     const response = await fetch("/api/cricket/live");
@@ -628,22 +702,74 @@ async function loadCricketScores() {
     const games = result.data || [];
 
     if (games.length === 0) {
-      status.textContent = "No live cricket matches right now. Please check again soon.";
+      status.textContent =
+        "No live cricket matches right now. Please check again soon.";
       matches.innerHTML = "";
+      refresh.textContent = "";
       return;
     }
 
     status.textContent = games.length + " live match(es)";
 
-    matches.innerHTML = games.map(match => `
-      <div class="match-card">
-        <h3>${escapeHTML(match.name || match.title || "Cricket match")}</h3>
-        <p>${escapeHTML(match.status?.description || "Live match")}</p>
-      </div>
-    `).join("");
+    matches.innerHTML = games.map(match => {
+      const home = match.home?.name || "Team 1";
+      const away = match.away?.name || "Team 2";
+
+      const homeInnings = formatTeamInnings(match.homeScore);
+      const awayInnings = formatTeamInnings(match.awayScore);
+
+      return `
+        <div class="live-match">
+          <h3>
+            ${escapeHTML(home)} vs ${escapeHTML(away)}
+          </h3>
+
+          <div class="live-meta">
+            ${escapeHTML(match.league?.name || "Cricket")}
+            ${match.venue?.name
+              ? " · " + escapeHTML(match.venue.name)
+              : ""}
+            ${match.venue?.city
+              ? ", " + escapeHTML(match.venue.city)
+              : ""}
+          </div>
+
+          <div class="live-teams">
+            <div class="live-team">
+              <div class="live-team-name">${escapeHTML(home)}</div>
+              <div class="live-team-total">
+                ${match.homeScore?.current != null &&
+                  Object.keys(match.homeScore?.innings || {}).length
+                  ? escapeHTML(match.homeScore.current) + " runs"
+                  : "Yet to bat"}
+              </div>
+              ${homeInnings}
+            </div>
+
+            <div class="live-team">
+              <div class="live-team-name">${escapeHTML(away)}</div>
+              <div class="live-team-total">
+                ${match.awayScore?.current != null &&
+                  Object.keys(match.awayScore?.innings || {}).length
+                  ? escapeHTML(match.awayScore.current) + " runs"
+                  : "Yet to bat"}
+              </div>
+              ${awayInnings}
+            </div>
+          </div>
+
+          <div class="live-status">
+            ${escapeHTML(match.status?.description || "Live match")}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    refresh.textContent = "Live scores refresh automatically every 60 seconds.";
 
   } catch (error) {
     status.textContent = "Live scores are temporarily unavailable.";
+    refresh.textContent = "";
   }
 }
 
