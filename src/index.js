@@ -165,6 +165,63 @@ if (url.pathname === "/api/horse/results") {
       }
     );
 
+// HORSE RACING: YESTERDAY'S INDIAN RESULTS
+if (url.pathname === "/api/horse/results") {
+  try {
+    const response = await fetch(
+      "https://api.apihorseracing.com/v1/results/yesterday",
+      {
+        headers: {
+          "X-API-Key": env.HORSE_RACING_API_KEY,
+          Accept: "application/json"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      return new Response(await response.text(), {
+        status: response.status,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const result = await response.json();
+
+    // Keep Indian meetings only
+    const indianMeetings = (Array.isArray(result.data) ? result.data : [])
+      .filter(meeting => {
+        const country = String(meeting.country || "").toUpperCase();
+        const countryCode = String(meeting.country_code || "").toUpperCase();
+
+        return country === "INDIA" ||
+               country === "IND" ||
+               countryCode === "IND";
+      });
+
+    const indianRaceCount = indianMeetings.reduce(
+      (total, meeting) =>
+        total + (Array.isArray(meeting.races) ? meeting.races.length : 0),
+      0
+    );
+
+    return Response.json({
+      ...result,
+      meta: {
+        ...result.meta,
+        meetings: indianMeetings.length,
+        count: indianRaceCount
+      },
+      data: indianMeetings
+    });
+
+  } catch (error) {
+    return Response.json(
+      { error: error.message },
+      { status: 502 }
+    );
+  }
+}
+
     return new Response(await response.text(), {
       status: response.status,
       headers: {
