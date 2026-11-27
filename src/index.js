@@ -10,24 +10,26 @@ export default {
         headers: { "Cache-Control": "no-store" }
       });
 
-    const isAdmin = () => {
-      return Boolean(
+    const isAdmin = () =>
+      Boolean(
         env.ADMIN_API_KEY &&
         request.headers.get("Authorization") ===
           `Bearer ${env.ADMIN_API_KEY}`
       );
-    };
 
     const requireAdmin = () => {
       if (!env.ADMIN_API_KEY) {
         return json({ error: "Admin API key is not configured" }, 500);
       }
+
       if (!isAdmin()) {
         return json({ error: "Unauthorized" }, 401);
       }
+
       if (!env.RACE_CARDS) {
         return json({ error: "Racecard storage is not configured" }, 503);
       }
+
       return null;
     };
 
@@ -48,6 +50,7 @@ export default {
             }
           }
         );
+
         return new Response(await response.text(), {
           status: response.status,
           headers: {
@@ -64,6 +67,7 @@ export default {
     if (path === "/api/cricket/upcoming") {
       try {
         const date = new Date().toISOString().slice(0, 10);
+
         const response = await fetch(
           `https://api.sportsapi.app/v2/fixtures?date=${date}&sport=cricket`,
           {
@@ -175,6 +179,7 @@ export default {
         }
 
         const parsedDate = new Date(`${raceDate}T00:00:00Z`);
+
         if (
           Number.isNaN(parsedDate.getTime()) ||
           parsedDate.toISOString().slice(0, 10) !== raceDate
@@ -237,8 +242,7 @@ export default {
 
     // ADMIN: LIST ALL SAVED RACECARDS
     if (
-      (path === "/api/admin/racecards" ||
-       path === "/api/horse/racecards") &&
+      path === "/api/admin/racecards" &&
       request.method === "GET"
     ) {
       const authError = requireAdmin();
@@ -247,7 +251,7 @@ export default {
       try {
         const listed = await env.RACE_CARDS.list({
           prefix: "racecard:",
-          limit: 100
+          limit: 1000
         });
 
         const racecards = [];
@@ -270,9 +274,68 @@ export default {
       }
     }
 
+    // PUBLIC: SHOW APPROVED INDIAN RACECARDS ONLY
+    if (
+      path === "/api/horse/racecards" &&
+      request.method === "GET"
+    ) {
+      if (!env.RACE_CARDS) {
+        return json({ error: "Racecard storage is not configured" }, 503);
+      }
+
+      try {
+        const listed = await env.RACE_CARDS.list({
+          prefix: "racecard:",
+          limit: 1000
+        });
+
+        const approved = [];
+
+        for (const item of listed.keys) {
+          const record = await env.RACE_CARDS.get(item.name, "json");
+
+          if (
+            record &&
+            record.status === "approved" &&
+            record.country === "India"
+          ) {
+            approved.push({
+              id: record.id,
+              raceDate: record.raceDate,
+              venue: record.venue,
+              country: record.country,
+              source: record.source,
+              text: record.text,
+              status: record.status,
+              createdAt: record.createdAt,
+              reviewedAt: record.reviewedAt
+            });
+          }
+        }
+
+        approved.sort((a, b) =>
+          String(b.raceDate).localeCompare(String(a.raceDate)) ||
+          String(b.createdAt).localeCompare(String(a.createdAt))
+        );
+
+        return json({
+          success: true,
+          count: approved.length,
+          data: approved
+        });
+
+      } catch {
+        return json({
+          error: "Could not retrieve approved racecards"
+        }, 500);
+      }
+    }
+
     // ADMIN: REVIEW ONE RACECARD
-    if (path === "/api/admin/racecard/review" &&
-        request.method === "POST") {
+    if (
+      path === "/api/admin/racecard/review" &&
+      request.method === "POST"
+    ) {
       const authError = requireAdmin();
       if (authError) return authError;
 
