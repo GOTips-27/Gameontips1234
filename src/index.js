@@ -10,22 +10,29 @@ export default {
         headers: { "Cache-Control": "no-store" }
       });
 
-    // CORS is not enabled: website and API use the same Worker origin.
-
-    // ADMIN AUTHENTICATION
     const isAdmin = () => {
-      const auth = request.headers.get("Authorization");
       return Boolean(
         env.ADMIN_API_KEY &&
-        auth === `Bearer ${env.ADMIN_API_KEY}`
+        request.headers.get("Authorization") ===
+          `Bearer ${env.ADMIN_API_KEY}`
       );
     };
 
+    const requireAdmin = () => {
+      if (!env.ADMIN_API_KEY) {
+        return json({ error: "Admin API key is not configured" }, 500);
+      }
+      if (!isAdmin()) {
+        return json({ error: "Unauthorized" }, 401);
+      }
+      if (!env.RACE_CARDS) {
+        return json({ error: "Racecard storage is not configured" }, 503);
+      }
+      return null;
+    };
+
     // CRICKET API KEY CHECK
-    if (
-      path.startsWith("/api/cricket/") &&
-      !env.SPORTS_API_KEY
-    ) {
+    if (path.startsWith("/api/cricket/") && !env.SPORTS_API_KEY) {
       return json({ error: "SportsAPI key is missing" }, 500);
     }
 
@@ -41,7 +48,6 @@ export default {
             }
           }
         );
-
         return new Response(await response.text(), {
           status: response.status,
           headers: {
@@ -49,7 +55,7 @@ export default {
             "Cache-Control": "no-store"
           }
         });
-      } catch (error) {
+      } catch {
         return json({ error: "Cricket provider request failed" }, 502);
       }
     }
@@ -58,7 +64,6 @@ export default {
     if (path === "/api/cricket/upcoming") {
       try {
         const date = new Date().toISOString().slice(0, 10);
-
         const response = await fetch(
           `https://api.sportsapi.app/v2/fixtures?date=${date}&sport=cricket`,
           {
@@ -88,11 +93,8 @@ export default {
             new Date(a.startTime) - new Date(b.startTime)
           );
 
-        return json({
-          data: fixtures,
-          count: fixtures.length
-        });
-      } catch (error) {
+        return json({ data: fixtures, count: fixtures.length });
+      } catch {
         return json({ error: "Could not retrieve upcoming matches" }, 502);
       }
     }
@@ -120,7 +122,7 @@ export default {
           status: response.status,
           headers: { "Content-Type": "application/json" }
         });
-      } catch (error) {
+      } catch {
         return json({ error: "Could not retrieve match details" }, 502);
       }
     }
@@ -148,24 +150,15 @@ export default {
           status: response.status,
           headers: { "Content-Type": "application/json" }
         });
-      } catch (error) {
+      } catch {
         return json({ error: "Could not retrieve scorecard" }, 502);
       }
     }
 
     // ADMIN: SAVE A RACECARD
     if (path === "/api/admin/racecard" && request.method === "POST") {
-      if (!env.ADMIN_API_KEY) {
-        return json({ error: "Admin API key is not configured" }, 500);
-      }
-
-      if (!isAdmin()) {
-        return json({ error: "Unauthorized" }, 401);
-      }
-
-      if (!env.RACE_CARDS) {
-        return json({ error: "Racecard storage is not configured" }, 503);
-      }
+      const authError = requireAdmin();
+      if (authError) return authError;
 
       try {
         const body = await request.json();
@@ -215,7 +208,8 @@ export default {
           source,
           text: racecardText,
           status: "pending_review",
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          reviewedAt: null
         };
 
         await env.RACE_CARDS.put(
@@ -223,7 +217,6 @@ export default {
           JSON.stringify(record)
         );
 
-        // Do not return the pasted racecard text to the browser.
         return json({
           success: true,
           message: "Racecard saved for administrator review",
@@ -237,25 +230,19 @@ export default {
           }
         }, 201);
 
-      } catch (error) {
+      } catch {
         return json({ error: "Invalid request or storage error" }, 400);
       }
     }
 
-    // ADMIN ONLY: LIST SAVED RACECARDS
-    // The stored source text is never returned to a public visitor.
-    if (path === "/api/horse/racecards" && request.method === "GET") {
-      if (!env.ADMIN_API_KEY) {
-        return json({ error: "Admin API key is not configured" }, 500);
-      }
-
-      if (!isAdmin()) {
-        return json({ error: "Unauthorized" }, 401);
-      }
-
-      if (!env.RACE_CARDS) {
-        return json({ error: "Racecard storage is not configured" }, 503);
-      }
+    // ADMIN: LIST ALL SAVED RACECARDS
+    if (
+      (path === "/api/admin/racecards" ||
+       path === "/api/horse/racecards") &&
+      request.method === "GET"
+    ) {
+      const authError = requireAdmin();
+      if (authError) return authError;
 
       try {
         const listed = await env.RACE_CARDS.list({
@@ -267,10 +254,7 @@ export default {
 
         for (const item of listed.keys) {
           const value = await env.RACE_CARDS.get(item.name, "json");
-
-          if (value) {
-            racecards.push(value);
-          }
+          if (value) racecards.push(value);
         }
 
         racecards.sort((a, b) =>
@@ -281,8 +265,58 @@ export default {
           count: racecards.length,
           data: racecards
         });
-      } catch (error) {
+      } catch {
         return json({ error: "Could not retrieve saved racecards" }, 500);
+      }
+    }
+
+    // ADMIN: REVIEW ONE RACECARD
+    if (path === "/api/admin/racecard/review" &&
+        request.method === "POST") {
+      const authError = requireAdmin();
+      if (authError) return authError;
+
+      try {
+        const body = await request.json();
+        const id = String(body.id || "").trim();
+        const decision = String(body.decision || "").trim();
+
+        if (!id || id.length > 100) {
+          return json({ error: "A valid racecard ID is required" }, 400);
+        }
+
+        if (!["approved", "rejected"].includes(decision)) {
+          return json({
+            error: "Decision must be approved or rejected"
+          }, 400);
+        }
+
+        const key = `racecard:${id}`;
+        const record = await env.RACE_CARDS.get(key, "json");
+
+        if (!record) {
+          return json({ error: "Racecard not found" }, 404);
+        }
+
+        record.status = decision;
+        record.reviewedAt = new Date().toISOString();
+
+        await env.RACE_CARDS.put(key, JSON.stringify(record));
+
+        return json({
+          success: true,
+          message: `Racecard ${decision} successfully`,
+          data: {
+            id: record.id,
+            raceDate: record.raceDate,
+            venue: record.venue,
+            status: record.status,
+            reviewedAt: record.reviewedAt
+          }
+        });
+
+      } catch {
+        return json({ error: "Could not update racecard review" }, 400);
       }
     }
 
@@ -349,7 +383,7 @@ export default {
           data: indianMeetings
         });
 
-      } catch (error) {
+      } catch {
         return json({ error: "Could not retrieve horse racing results" }, 502);
       }
     }
@@ -371,7 +405,7 @@ export default {
           status: response.status,
           headers: { "Content-Type": "application/json" }
         });
-      } catch (error) {
+      } catch {
         return json({ error: "Could not retrieve country coverage" }, 502);
       }
     }
