@@ -4,490 +4,656 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="GameOnTips1234 - Indian cricket and horse racing analysis, previews and results.">
-<title>GameOnTips1234 | Cricket & Indian Horse Racing</title>
+<meta name="description" content="GameOnTips1234 - Indian cricket and horse racing previews, analysis and results.">
+<meta name="theme-color" content="#080d18">
+<title>GameOnTips1234 | Indian Cricket & Horse Racing</title>
 
 <style>
 :root {
   --bg:#080d18;
   --panel:#111b2d;
+  --panel2:#0d1524;
+  --gold:#e7b84b;
+  --gold-light:#f8d982;
   --green:#22c55e;
   --white:#f8fafc;
   --muted:#a8b3c7;
+  --border:#293750;
 }
-* { box-sizing:border-box; }
-body {
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
   margin:0;
   font-family:Arial,sans-serif;
   background:var(--bg);
   color:var(--white);
   line-height:1.6;
 }
-header {
-  background:#101a2b;
-  padding:18px 6%;
+header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(8,13,24,.96);
+  backdrop-filter:blur(12px);
+  padding:15px 5%;
   display:flex;
   justify-content:space-between;
   align-items:center;
   flex-wrap:wrap;
   gap:15px;
-  border-bottom:1px solid #26344a;
+  border-bottom:1px solid var(--border);
 }
-.logo { font-size:23px;font-weight:bold; }
-.logo span { color:var(--green); }
-nav { display:flex;gap:20px;flex-wrap:wrap; }
-nav a { color:var(--white);text-decoration:none;font-size:14px; }
-nav a:hover { color:var(--green); }
-.hero {
-  padding:75px 7%;
+.logo{
+  font-size:23px;
+  font-weight:900;
+  letter-spacing:.5px;
+  white-space:nowrap;
+}
+.logo span{color:var(--gold)}
+nav{display:flex;gap:16px;flex-wrap:wrap}
+nav a{
+  color:var(--white);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:bold;
+}
+nav a:hover{color:var(--gold)}
+.hero{
+  min-height:540px;
+  padding:100px 6%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   text-align:center;
-  background:linear-gradient(135deg,#13233b,#080d18);
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(90deg,rgba(5,10,20,.82),rgba(5,10,20,.58),rgba(5,10,20,.82)),
+    url("https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=1800&q=85") left center/cover no-repeat,
+    #101a2b;
 }
-.hero h1 {
-  font-size:clamp(32px,6vw,55px);
-  margin:0 0 15px;
+.hero:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,transparent 49.8%,rgba(231,184,75,.65) 50%,transparent 50.2%);
+  pointer-events:none;
 }
-.hero h1 span { color:var(--green); }
-.hero p {
-  color:var(--muted);
-  max-width:650px;
-  margin:auto;
+.hero-content{
+  position:relative;
+  z-index:2;
+  max-width:850px;
+  padding:35px;
+  background:rgba(5,10,20,.48);
+  border:1px solid rgba(231,184,75,.35);
+  border-radius:18px;
+  backdrop-filter:blur(5px);
 }
-.button,.match-button {
+.hero-kicker{
+  color:var(--gold-light);
+  font-size:13px;
+  letter-spacing:4px;
+  font-weight:bold;
+}
+.hero h1{
+  font-size:clamp(36px,6vw,66px);
+  line-height:1.12;
+  margin:15px 0;
+}
+.hero h1 span{color:var(--gold)}
+.hero p{
+  color:#e0e5ee;
+  max-width:680px;
+  margin:0 auto 15px;
+  font-size:17px;
+}
+.hero-buttons{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:22px;
+}
+.button,.match-button{
   display:inline-block;
-  background:var(--green);
-  color:#06120a;
-  padding:12px 23px;
+  background:var(--gold);
+  color:#17120a;
+  padding:12px 22px;
   border-radius:7px;
   text-decoration:none;
   font-weight:bold;
-  margin-top:15px;
   border:0;
   cursor:pointer;
+  transition:.2s;
 }
-button:disabled { opacity:.5;cursor:not-allowed; }
-section { padding:55px 7%; }
-.section-title { text-align:center;margin-bottom:30px; }
-.section-title h2 { font-size:30px;margin-bottom:5px; }
-.section-title p { color:var(--muted); }
-.cards {
+.button:hover,.match-button:hover{
+  background:var(--gold-light);
+  transform:translateY(-2px);
+}
+.button.secondary{
+  background:transparent;
+  color:var(--gold-light);
+  border:1px solid var(--gold);
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+section{padding:65px 7%}
+.section-title{
+  text-align:center;
+  margin-bottom:32px;
+}
+.section-title h2{
+  font-size:clamp(25px,4vw,34px);
+  margin:0 0 7px;
+}
+.section-title p{color:var(--muted);margin:0}
+.gold-line{
+  width:65px;
+  height:3px;
+  background:var(--gold);
+  margin:15px auto;
+  border-radius:5px;
+}
+.cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
   gap:20px;
 }
-.card,.match-card,.live-match,.racing-meeting,.result-meeting {
-  background:var(--panel);
-  border:1px solid #26344a;
-  border-radius:12px;
-  padding:20px;
+.card,.match-card,.racing-meeting,.result-meeting{
+  background:linear-gradient(145deg,#142139,#0d1524);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:23px;
   margin:14px 0;
+  transition:.2s;
 }
-.card h3,.racing-meeting h3,.result-meeting h3,.live-match h3 {
-  color:var(--green);
-  margin-top:0;
+.card:hover{
+  border-color:var(--gold);
+  transform:translateY(-3px);
 }
-.card p,.match-card p,.racing-meeting p,.result-race p {
+.card h3,.racing-meeting h3,.result-meeting h3{
+  color:var(--gold);
+  margin-top:8px;
+}
+.card p,.match-card p,.racing-meeting p,.result-race p{
   color:var(--muted);
 }
-.tag {
+.tag{
   display:inline-block;
-  background:#173b2a;
-  color:#86efac;
+  background:rgba(231,184,75,.13);
+  color:var(--gold-light);
+  border:1px solid rgba(231,184,75,.35);
   padding:4px 10px;
   border-radius:20px;
-  font-size:12px;
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:.4px;
 }
-.analysis { background:#0d1524; }
-.analysis-box {
-  max-width:850px;
+.analysis{background:#0b1220}
+.analysis-box{
+  max-width:900px;
   margin:auto;
   background:var(--panel);
   padding:25px;
-  border-radius:12px;
-  border:1px solid #26344a;
+  border-radius:13px;
+  border:1px solid var(--border);
 }
-.analysis-box h3 { color:var(--green); }
-.analysis-box li { margin:10px 0;color:var(--muted); }
-.about { text-align:center; }
-.about p { max-width:750px;margin:auto;color:var(--muted); }
-footer {
-  text-align:center;
-  padding:30px 7%;
-  background:#050914;
+.analysis-box h3{color:var(--gold)}
+.analysis-box li{margin:10px 0;color:var(--muted)}
+.about{text-align:center}
+.about p{
+  max-width:780px;
+  margin:auto;
   color:var(--muted);
-  font-size:13px;
 }
-.match-card h3 { color:var(--green);margin-top:0; }
-.match-button { padding:10px 16px;margin:5px 5px 5px 0; }
-#match-details {
+.sport-banner{
+  min-height:190px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:30px;
+  border-radius:15px;
+  overflow:hidden;
+  background:
+    linear-gradient(rgba(5,10,20,.72),rgba(5,10,20,.82)),
+    url("https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1400&q=80") center/cover;
+  border:1px solid var(--border);
+}
+.racing-banner{
+  background:
+    linear-gradient(rgba(5,10,20,.68),rgba(5,10,20,.82)),
+    url("https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=1400&q=80") center/cover;
+}
+.sport-banner h3{
+  font-size:28px;
+  color:var(--gold-light);
+  margin:0;
+}
+#match-details{
   display:none;
-  max-width:850px;
+  max-width:900px;
   margin:25px auto;
   padding:22px;
   background:var(--panel);
-  border:1px solid var(--green);
+  border:1px solid var(--gold);
   border-radius:12px;
 }
-.detail-row,.scorecard-row {
+.detail-row,.scorecard-row{
   padding:10px 0;
-  border-bottom:1px solid #26344a;
+  border-bottom:1px solid var(--border);
   overflow-wrap:anywhere;
 }
-.detail-label,.scorecard-key { color:var(--muted); }
-#match-details h3 { color:var(--green); }
-.scorecard-innings {
-  background:#0d1524;
-  border:1px solid #26344a;
+.detail-label,.scorecard-key{color:var(--muted)}
+#match-details h3{color:var(--gold)}
+.scorecard-innings{
+  background:var(--panel2);
+  border:1px solid var(--border);
   border-radius:10px;
   padding:15px;
   margin:15px 0;
   overflow-wrap:anywhere;
 }
-.scorecard-innings h4 { color:var(--green);margin-top:0; }
-.scorecard-nested {
+.scorecard-innings h4{color:var(--gold);margin-top:0}
+.scorecard-nested{
   margin:8px 0 8px 12px;
   padding-left:12px;
-  border-left:2px solid #26344a;
+  border-left:2px solid var(--border);
 }
-.live-match h3 { margin:0 0 8px; }
-.live-meta,.race-meta {
+#horse-results-status,#approved-racecards-status,
+#upcoming-status{
+  color:var(--muted);
+  font-size:13px;
+  text-align:center;
+  margin:15px 0;
+}
+.race-preview,.result-race{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+  margin:14px 0;
+}
+.race-preview h4,.result-race h4{
+  color:var(--gold);
+  margin:0 0 8px;
+}
+.result-available{color:#86efac!important;font-size:13px}
+.result-pending{color:#fbbf24!important;font-size:13px}
+.race-meta{
   color:var(--muted);
   font-size:13px;
   margin-bottom:15px;
 }
-.live-teams {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.live-team {
-  background:#0d1524;
-  border:1px solid #26344a;
-  border-radius:9px;
-  padding:13px;
-  min-width:0;
-}
-.live-team-name { font-weight:bold;overflow-wrap:anywhere; }
-.live-team-total {
-  color:var(--green);
-  font-size:23px;
-  font-weight:bold;
-  margin-top:5px;
-}
-.live-innings { color:var(--muted);font-size:13px;margin-top:7px; }
-.live-status {
-  display:inline-block;
-  background:#173b2a;
-  color:#86efac;
-  border-radius:20px;
-  padding:5px 12px;
-  font-size:12px;
-  margin-top:14px;
-}
-.live-refresh,#horse-results-status,#approved-racecards-status {
-  color:var(--muted);
-  font-size:13px;
-  text-align:center;
-  margin-top:15px;
-}
-.race-preview,.result-race {
-  background:#0d1524;
-  border:1px solid #26344a;
-  border-radius:10px;
-  padding:18px;
-  margin:14px 0;
-}
-.race-preview h4,.result-race h4 {
-  color:var(--green);
-  margin:0 0 8px;
-}
-.race-pick { color:#86efac!important;font-weight:bold; }
-.race-warning,.result-pending { color:#fbbf24!important;font-size:13px; }
-.result-available { color:#86efac!important;font-size:13px; }
-.admin-panel {
-  max-width:850px;
+.admin-panel{
+  max-width:900px;
   margin:auto;
   background:var(--panel);
-  border:1px solid #26344a;
+  border:1px solid var(--border);
   border-radius:12px;
   padding:24px;
 }
-.admin-panel label {
+.admin-panel label{
   display:block;
   margin:14px 0 6px;
   color:var(--muted);
 }
-.admin-panel input,.admin-panel textarea {
+.admin-panel input,.admin-panel textarea{
   width:100%;
   padding:12px;
   background:#080d18;
   color:white;
-  border:1px solid #26344a;
+  border:1px solid var(--border);
   border-radius:7px;
   font:inherit;
 }
-.admin-panel textarea { min-height:220px;resize:vertical; }
-.admin-panel button { margin-top:18px; }
-#admin-status,#review-status {
+.admin-panel textarea{min-height:220px;resize:vertical}
+.admin-panel button{margin-top:18px}
+#admin-status,#review-status{
   margin-top:15px;
   overflow-wrap:anywhere;
 }
-.review-card {
-  background:#0d1524;
-  border:1px solid #26344a;
+.review-card,.approved-racecard{
+  background:var(--panel2);
+  border:1px solid var(--border);
   border-radius:10px;
   padding:18px;
   margin:15px 0;
 }
-.review-card h3 { color:var(--green);margin-top:0; }
-.review-card pre {
+.review-card h3,.approved-racecard h3{color:var(--gold);margin-top:0}
+.review-card pre,.approved-racecard pre{
   white-space:pre-wrap;
   overflow-wrap:anywhere;
   color:var(--muted);
   background:#080d18;
-  padding:12px;
+  padding:14px;
   border-radius:8px;
   max-height:500px;
   overflow:auto;
 }
-.review-card summary {
-  color:var(--green);
+.review-card summary,.approved-racecard summary{
+  color:var(--gold-light);
   cursor:pointer;
   margin:12px 0;
 }
-.review-status { color:#86efac;font-weight:bold; }
-.approved-racecard {
-  background:#0d1524;
-  border:1px solid #26344a;
-  border-radius:10px;
-  padding:18px;
-  margin:14px 0;
-}
-.approved-racecard h3 { color:var(--green);margin-top:0; }
-.approved-racecard pre {
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
+.review-status{color:#86efac;font-weight:bold}
+.empty-message{
+  text-align:center;
   color:var(--muted);
-  background:#080d18;
-  padding:15px;
-  border-radius:8px;
-  margin-top:12px;
+  padding:20px;
+  background:var(--panel);
+  border-radius:10px;
+  border:1px solid var(--border);
 }
-.approved-racecard summary {
-  color:var(--green);
-  cursor:pointer;
-  margin-top:15px;
+footer{
+  text-align:center;
+  padding:35px 7%;
+  background:#050914;
+  color:var(--muted);
+  font-size:13px;
+  border-top:1px solid var(--border);
 }
-@media(max-width:600px) {
-  header { justify-content:center; }
-  nav { justify-content:center;gap:13px; }
-  .hero { padding:55px 6%; }
-  section { padding:40px 6%; }
-  .live-teams { grid-template-columns:1fr; }
+footer strong{color:var(--gold)}
+@media(max-width:700px){
+  header{justify-content:center}
+  nav{justify-content:center;gap:12px}
+  .hero{min-height:470px;padding:65px 5%}
+  .hero-content{padding:24px 15px}
+  section{padding:45px 6%}
+  .logo{font-size:21px}
 }
 </style>
 </head>
 
 <body>
+
 <header>
-<div class="logo">GAME<span>ON</span>TIPS1234</div>
-<nav>
-<a href="#home">Home</a>
-<a href="#cricket">Cricket</a>
-<a href="#racing">Horse Racing</a>
-<a href="#approved-racecards">Approved Racecards</a>
-<a href="#bangalore-races">Race Previews</a>
-<a href="#horse-results">Results</a>
-<a href="#admin-review">Admin Review</a>
-<a href="#about">About</a>
-</nav>
+  <div class="logo">GAME<span>ON</span>TIPS1234</div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#cricket">Cricket</a>
+    <a href="#racing">Horse Racing</a>
+    <a href="#approved-racecards">Racecards</a>
+    <a href="#race-previews">Previews</a>
+    <a href="#horse-results">Results</a>
+    <a href="#upcoming-cricket">Fixtures</a>
+    <a href="#admin-review">Admin</a>
+    <a href="#about">About</a>
+  </nav>
 </header>
 
 <main>
 
+<!-- HOMEPAGE HERO -->
 <div class="hero" id="home">
-<h1>WELCOME TO <span>GAME ON TIPS</span></h1>
-<p>Indian cricket and horse racing analysis, race previews, match information and research-based sports insights.</p>
-<a class="button" href="#cricket">Explore Analysis</a>
+  <div class="hero-content">
+    <div class="hero-kicker">INDIAN SPORTS ANALYSIS PLATFORM</div>
+    <h1>GAME ON <span>TIPS1234</span></h1>
+    <p>
+      Indian horse racing and cricket previews, detailed research,
+      match information and results — all in one place.
+    </p>
+    <div class="hero-buttons">
+      <a class="button" href="#racing">Explore Horse Racing</a>
+      <a class="button secondary" href="#cricket">Explore Cricket</a>
+    </div>
+  </div>
 </div>
 
+<!-- CRICKET -->
 <section id="cricket">
-<div class="section-title">
-<h2>🏏 Cricket Analysis</h2>
-<p>Detailed match previews and cricket insights.</p>
-</div>
-<div class="cards">
-<div class="card">
-<span class="tag">MATCH PREVIEW</span>
-<h3>Match Analysis</h3>
-<p>Team strengths, recent form, pitch conditions and match factors.</p>
-</div>
-<div class="card">
-<span class="tag">PLAYER INSIGHTS</span>
-<h3>Top Players</h3>
-<p>Batting, bowling, all-rounder and player performance information.</p>
-</div>
-<div class="card">
-<span class="tag">TEAM RESEARCH</span>
-<h3>Team Comparison</h3>
-<p>Compare teams using available statistics, recent results and relevant match data.</p>
-</div>
-</div>
+  <div class="section-title">
+    <h2>🏏 Cricket Analysis</h2>
+    <div class="gold-line"></div>
+    <p>Match previews, team research and player information.</p>
+  </div>
+
+  <div class="sport-banner">
+    <div>
+      <h3>CRICKET INSIGHTS</h3>
+      <p>Research. Compare. Understand the match.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <span class="tag">MATCH PREVIEW</span>
+      <h3>Match Analysis</h3>
+      <p>Team strengths, recent form, pitch conditions and relevant match factors.</p>
+    </div>
+    <div class="card">
+      <span class="tag">PLAYER INSIGHTS</span>
+      <h3>Top Players</h3>
+      <p>Batting, bowling, all-rounder and player performance information.</p>
+    </div>
+    <div class="card">
+      <span class="tag">TEAM RESEARCH</span>
+      <h3>Team Comparison</h3>
+      <p>Compare teams using available statistics, recent results and match data.</p>
+    </div>
+  </div>
 </section>
 
+<!-- HORSE RACING -->
 <section id="racing" class="analysis">
-<div class="section-title">
-<h2>🐎 Indian Horse Racing</h2>
-<p>Research every horse and understand the race.</p>
-</div>
-<div class="cards">
-<div class="card">
-<h3>Horse Form</h3>
-<p>Review previous performances, consistency and suitability for the race.</p>
-</div>
-<div class="card">
-<h3>Jockey & Trainer</h3>
-<p>Study jockey and trainer records where reliable information is available.</p>
-</div>
-<div class="card">
-<h3>Race Conditions</h3>
-<p>Consider distance, course, draw, weight and ground conditions.</p>
-</div>
-</div>
+  <div class="section-title">
+    <h2>🐎 Indian Horse Racing</h2>
+    <div class="gold-line"></div>
+    <p>Race-by-race research covering Indian race meetings.</p>
+  </div>
+
+  <div class="sport-banner racing-banner">
+    <div>
+      <h3>INDIAN HORSE RACING</h3>
+      <p>Every runner deserves proper consideration.</p>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Horse Form</h3>
+      <p>Review previous performances, consistency and suitability for the race.</p>
+    </div>
+    <div class="card">
+      <h3>Jockey & Trainer</h3>
+      <p>Study jockey and trainer records where reliable information is available.</p>
+    </div>
+    <div class="card">
+      <h3>Race Conditions</h3>
+      <p>Consider distance, course, draw, weight and ground conditions.</p>
+    </div>
+    <div class="card">
+      <h3>Runner Assessment</h3>
+      <p>Assess each declared horse and clearly explain its strengths and concerns when verified analysis is available.</p>
+    </div>
+  </div>
 </section>
 
-<!-- PUBLIC APPROVED RACECARDS -->
+<!-- APPROVED RACECARDS -->
 <section id="approved-racecards" class="analysis">
-<div class="section-title">
-<h2>🏇 Approved Indian Racecards</h2>
-<p>Racecards reviewed and approved by our administrator.</p>
-<span class="tag">ADMIN APPROVED</span>
-</div>
-<div id="approved-racecards-status">Loading approved racecards...</div>
-<div id="approved-racecards-list"></div>
+  <div class="section-title">
+    <h2>🏇 Approved Indian Racecards</h2>
+    <div class="gold-line"></div>
+    <p>Racecards reviewed and approved by our administrator.</p>
+    <span class="tag">ADMIN APPROVED</span>
+  </div>
+  <div id="approved-racecards-status">Loading approved racecards...</div>
+  <div id="approved-racecards-list"></div>
 </section>
 
-<section id="bangalore-races" class="analysis">
-<div class="section-title">
-<h2>🏇 Bangalore Race Previews</h2>
-<p>Historical meeting · 27 November 2026</p>
-<span class="tag">PROVISIONAL AI ANALYSIS</span>
-</div>
-
-<div class="analysis-box">
-<h3>Race preview information</h3>
-<p>These previews use racecard and trackwork information supplied for the 27 November 2026 Bangalore meeting. They are provisional research notes, not verified final selections.</p>
-<p>Race results, final declarations, jockey changes, track conditions and late withdrawals must be checked independently. No horse is guaranteed to win.</p>
-<p><strong>Publication status:</strong> Historical reference only. See approved racecards for current administrator-approved material.</p>
-</div>
+<!-- RACE PREVIEWS -->
+<section id="race-previews">
+  <div class="section-title">
+    <h2>🏆 Race Previews & Selections</h2>
+    <div class="gold-line"></div>
+    <p>Administrator-approved race analysis and selections.</p>
+  </div>
+  <div class="analysis-box">
+    <h3>Race preview publication</h3>
+    <p>
+      Our race previews will be published after the relevant racecard
+      and analysis have been reviewed and approved.
+    </p>
+    <p>
+      Each horse should be accounted for in the final assessment.
+      Ratings and explanations will be shown only when the supporting
+      information is available and checked.
+    </p>
+    <p>
+      Race conditions, jockey changes, withdrawals and late updates
+      can affect assessments. No selection is guaranteed to win.
+    </p>
+    <p class="race-warning">
+      Current status: The automatic horse-by-horse analysis and
+      preview publishing feature is not yet connected.
+    </p>
+    <a class="button" href="#approved-racecards">View Approved Racecards</a>
+  </div>
 </section>
 
+<!-- HORSE RESULTS -->
 <section id="horse-results" class="analysis">
-<div class="section-title">
-<h2>🏆 Indian Horse Racing Results</h2>
-<p>Latest available results from Indian race meetings.</p>
-<span class="tag">INDIA ONLY</span>
-</div>
-<div id="horse-results-status">Loading Indian horse racing results...</div>
-<div id="horse-results-list"></div>
-<div class="analysis-box">
-<p>Results are displayed using available data from our horse racing provider. Only Indian meetings are shown. Results may be unavailable on non-racing days.</p>
-<p>Check official results before relying on race outcomes.</p>
-</div>
+  <div class="section-title">
+    <h2>🏆 Indian Horse Racing Results</h2>
+    <div class="gold-line"></div>
+    <p>Latest available results from Indian race meetings.</p>
+    <span class="tag">INDIA ONLY</span>
+  </div>
+  <div id="horse-results-status">Loading Indian horse racing results...</div>
+  <div id="horse-results-list"></div>
+  <div class="analysis-box">
+    <p>
+      Results are displayed using available data from our horse racing
+      provider. Only Indian meetings are shown.
+    </p>
+    <p>Please check official results before relying on race outcomes.</p>
+  </div>
 </section>
 
+<!-- ANALYSIS PROCESS -->
 <section>
-<div class="section-title">
-<h2>Our Analysis Process</h2>
-<p>Research first. Review carefully. Publish responsibly.</p>
-</div>
-<div class="analysis-box">
-<h3>How GameOnTips1234 works</h3>
-<ol>
-<li>Collect available match and race information.</li>
-<li>Prepare analysis using reliable data sources.</li>
-<li>Clearly identify missing or uncertain information.</li>
-<li>Submit analysis for administrator review.</li>
-<li>Publish only after approval.</li>
-</ol>
-<p style="color:#a8b3c7">Automated analysis and administrator approval are being developed in stages.</p>
-</div>
+  <div class="section-title">
+    <h2>Our Analysis Process</h2>
+    <div class="gold-line"></div>
+    <p>Research first. Review carefully. Publish responsibly.</p>
+  </div>
+  <div class="analysis-box">
+    <h3>How GameOnTips1234 works</h3>
+    <ol>
+      <li>Collect available match and race information.</li>
+      <li>Prepare analysis using reliable data sources.</li>
+      <li>Check every available runner and relevant match factor.</li>
+      <li>Clearly identify missing or uncertain information.</li>
+      <li>Submit content for administrator review.</li>
+      <li>Publish only after approval.</li>
+    </ol>
+    <p style="color:var(--muted)">
+      Our website is being developed in stages. Information availability
+      and analysis coverage may vary.
+    </p>
+  </div>
 </section>
 
-<section id="about" class="about">
-<div class="section-title"><h2>About GameOnTips1234</h2></div>
-<p>GameOnTips1234 is an independent sports analysis platform focusing initially on Indian cricket and Indian horse racing. Our goal is to provide clear, informative and research-based sports content.</p>
-</section>
-
+<!-- UPCOMING CRICKET -->
 <section id="upcoming-cricket">
-<div class="section-title">
-<h2>🏏 Upcoming Cricket Matches</h2>
-<p>Tap a match to explore its details.</p>
-</div>
-<div id="upcoming-matches">Loading upcoming matches...</div>
+  <div class="section-title">
+    <h2>🏏 Upcoming Cricket Matches</h2>
+    <div class="gold-line"></div>
+    <p>Explore upcoming fixtures and available match information.</p>
+  </div>
+  <div id="upcoming-status">Loading upcoming matches...</div>
+  <div id="upcoming-matches"></div>
 </section>
 
-<section id="match-centre">
-<div id="match-details"></div>
+<!-- MATCH CENTRE -->
+<section id="match-centre" class="analysis">
+  <div id="match-details"></div>
 </section>
 
-<section id="live-cricket">
-<div class="section-title">
-<h2>🏏 Live Cricket Scores</h2>
-<p>Live matches from around the world.</p>
-</div>
-<div id="cricket-status">Loading cricket scores...</div>
-<div id="cricket-matches"></div>
-<div class="live-refresh" id="live-refresh"></div>
+<!-- ABOUT -->
+<section id="about" class="about">
+  <div class="section-title">
+    <h2>About GameOnTips1234</h2>
+    <div class="gold-line"></div>
+  </div>
+  <p>
+    GameOnTips1234 is an independent sports analysis platform
+    focusing initially on Indian cricket and Indian horse racing.
+    Our goal is to provide clear, informative and research-based
+    sports content for visitors.
+  </p>
 </section>
 
-<!-- ADMIN RACECARD REVIEW -->
+<!-- ADMIN REVIEW -->
 <section id="admin-review" class="analysis">
-<div class="section-title">
-<h2>🔐 Administrator Racecard Review</h2>
-<p>Review imported racecards before approval. API access requires your administrator key.</p>
-<span class="tag">ADMIN ACCESS REQUIRED</span>
-</div>
-<div class="admin-panel">
-<label for="review-key">Admin API Key</label>
-<input id="review-key" type="password" autocomplete="off" placeholder="Enter your admin secret">
-<button class="button" type="button" id="load-racecards">Load Saved Racecards</button>
-<p id="review-status" aria-live="polite"></p>
-<div id="review-list"></div>
-</div>
+  <div class="section-title">
+    <h2>🔐 Administrator Racecard Review</h2>
+    <div class="gold-line"></div>
+    <p>Review imported racecards before public approval.</p>
+    <span class="tag">ADMIN ACCESS REQUIRED</span>
+  </div>
+  <div class="admin-panel">
+    <label for="review-key">Admin API Key</label>
+    <input id="review-key" type="password" autocomplete="off"
+      placeholder="Enter your admin secret">
+    <button class="button" type="button" id="load-racecards">
+      Load Saved Racecards
+    </button>
+    <p id="review-status" aria-live="polite"></p>
+    <div id="review-list"></div>
+  </div>
 </section>
 
-<!-- ADMIN RACECARD IMPORT -->
+<!-- ADMIN IMPORT -->
 <section id="admin-import" class="analysis">
-<div class="section-title">
-<h2>🔐 Administrator Racecard Import</h2>
-<p>This form is visible on the website; the API write is protected by your secret key.</p>
-</div>
-<form id="racecard-form" class="admin-panel">
-<label for="admin-key">Admin API Key</label>
-<input id="admin-key" type="password" autocomplete="off" required placeholder="Enter your admin secret">
-<label for="race-date">Race Date</label>
-<input id="race-date" type="date" required>
-<label for="race-venue">Racecourse</label>
-<input id="race-venue" type="text" required placeholder="Example: Bangalore">
-<label for="race-source">Racecard Source (optional)</label>
-<input id="race-source" type="text" placeholder="Example: Official racecard">
-<label for="race-text">Paste Complete Racecard</label>
-<textarea id="race-text" required maxlength="100000" placeholder="Paste the racecard text here. Only import material you are permitted to store."></textarea>
-<button class="button" type="submit">Save Racecard for Review</button>
-<p id="admin-status" aria-live="polite"></p>
-</form>
+  <div class="section-title">
+    <h2>🔐 Administrator Racecard Import</h2>
+    <div class="gold-line"></div>
+    <p>Import a racecard and submit it for administrator review.</p>
+  </div>
+
+  <form id="racecard-form" class="admin-panel">
+    <label for="admin-key">Admin API Key</label>
+    <input id="admin-key" type="password" autocomplete="off"
+      required placeholder="Enter your admin secret">
+
+    <label for="race-date">Race Date</label>
+    <input id="race-date" type="date" required>
+
+    <label for="race-venue">Racecourse</label>
+    <input id="race-venue" type="text" required
+      placeholder="Example: Bangalore">
+
+    <label for="race-source">Racecard Source (optional)</label>
+    <input id="race-source" type="text"
+      placeholder="Example: Official racecard">
+
+    <label for="race-text">Paste Complete Racecard</label>
+    <textarea id="race-text" required maxlength="100000"
+      placeholder="Paste the complete racecard text here. Only import material you are permitted to store."></textarea>
+
+    <button class="button" type="submit">
+      Save Racecard for Review
+    </button>
+    <p id="admin-status" aria-live="polite"></p>
+  </form>
 </section>
 
 </main>
 
 <footer>
-<p>© 2026 GameOnTips1234. All rights reserved.</p>
-<p>Sports analysis is for information and entertainment. Predictions are uncertain and outcomes are never guaranteed.</p>
-<p>Please follow applicable local laws and gamble responsibly.</p>
+  <p><strong>GAMEON TIPS1234</strong></p>
+  <p>© 2026 GameOnTips1234. All rights reserved.</p>
+  <p>
+    Sports analysis is for information and entertainment.
+    Predictions are uncertain and outcomes are never guaranteed.
+  </p>
+  <p>Please follow applicable local laws and gamble responsibly.</p>
 </footer>
 
 <script>
+"use strict";
+
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&":"&amp;",
@@ -498,7 +664,7 @@ function escapeHTML(value) {
   }[char]));
 }
 
-// PUBLIC: LOAD ADMIN-APPROVED INDIAN RACECARDS
+// PUBLIC: LOAD APPROVED INDIAN RACECARDS
 async function loadApprovedRacecards() {
   const status = document.getElementById("approved-racecards-status");
   const list = document.getElementById("approved-racecards-list");
@@ -539,6 +705,7 @@ async function loadApprovedRacecards() {
   }
 }
 
+// PUBLIC: LOAD INDIAN HORSE RACING RESULTS
 async function loadIndianHorseResults() {
   const status = document.getElementById("horse-results-status");
   const list = document.getElementById("horse-results-list");
@@ -551,7 +718,7 @@ async function loadIndianHorseResults() {
     const meetings = Array.isArray(result.data) ? result.data : [];
 
     if (!meetings.length) {
-      status.textContent = "No Indian horse-racing results available for yesterday.";
+      status.textContent = "No Indian horse-racing results available for the latest provider date.";
       list.innerHTML = "";
       return;
     }
@@ -560,6 +727,7 @@ async function loadIndianHorseResults() {
 
     list.innerHTML = meetings.map(meeting => {
       const races = Array.isArray(meeting.races) ? meeting.races : [];
+
       return `
         <div class="result-meeting">
           <h3>🏇 ${escapeHTML(meeting.course || "Indian Race Meeting")}</h3>
@@ -571,26 +739,34 @@ async function loadIndianHorseResults() {
           ${races.length ? races.map(race => `
             <div class="result-race">
               <h4>${escapeHTML(race.name || "Race")}</h4>
-              <p>Time: ${escapeHTML(race.time || "Not available")} · Distance: ${escapeHTML(race.distance || "Not available")}</p>
+              <p>
+                Time: ${escapeHTML(race.time || "Not available")}
+                · Distance: ${escapeHTML(race.distance || "Not available")}
+              </p>
               <p>Runners: ${escapeHTML(race.runners ?? "Not available")}</p>
               <p class="${race.result_available ? "result-available" : "result-pending"}">
-                ${race.result_available ? "Result record available from provider" : "Result not yet available"}
+                ${race.result_available
+                  ? "Result record available from provider"
+                  : "Result not yet available"}
               </p>
             </div>
           `).join("") : "<p>No race information available.</p>"}
         </div>
       `;
     }).join("");
-  } catch {
+  } catch (error) {
     status.textContent = "Indian horse racing results are temporarily unavailable.";
     list.innerHTML = "";
   }
 }
 
+// DATE FORMATTING
 function formatDate(value) {
   if (!value) return "Not available";
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Not available";
+
   return date.toLocaleString("en-GB", {
     dateStyle:"medium",
     timeStyle:"short",
@@ -598,10 +774,13 @@ function formatDate(value) {
   }) + " UTC";
 }
 
+// SCORECARD DISPLAY
 function renderScorecardValue(value) {
   if (value === null || value === undefined || value === "") return "";
+
   if (Array.isArray(value)) {
     if (!value.length) return "";
+
     return value.map(item => `
       <div class="scorecard-nested">
         ${typeof item === "object" && item !== null
@@ -610,231 +789,316 @@ function renderScorecardValue(value) {
       </div>
     `).join("");
   }
+
   if (typeof value === "object") {
     return Object.entries(value).map(([key, item]) => {
       if (item === null || item === undefined || item === "") return "";
-      const label = key.replace(/([A-Z])/g, " $1")
+
+      const label = key
+        .replace(/([A-Z])/g, " $1")
         .replace(/[_-]/g, " ")
         .replace(/^./, c => c.toUpperCase());
+
       if (typeof item === "object") {
-        return `<div class="scorecard-row"><div class="scorecard-key">${escapeHTML(label)}</div>${renderScorecardValue(item)}</div>`;
+        return `
+          <div class="scorecard-row">
+            <div class="scorecard-key">${escapeHTML(label)}</div>
+            ${renderScorecardValue(item)}
+          </div>
+        `;
       }
-      return `<div class="scorecard-row"><span class="scorecard-key">${escapeHTML(label)}:</span> ${escapeHTML(item)}</div>`;
+
+      return `
+        <div class="scorecard-row">
+          <span class="scorecard-key">${escapeHTML(label)}:</span>
+          ${escapeHTML(item)}
+        </div>
+      `;
     }).join("");
   }
+
   return escapeHTML(value);
 }
 
+// UPCOMING CRICKET FIXTURES
 async function loadUpcomingMatches() {
   const box = document.getElementById("upcoming-matches");
+  const status = document.getElementById("upcoming-status");
+
   try {
     const response = await fetch("/api/cricket/upcoming");
     if (!response.ok) throw new Error();
+
     const result = await response.json();
-    const matches = result.data || [];
+    const matches = Array.isArray(result.data) ? result.data : [];
+
     if (!matches.length) {
-      box.textContent = "No upcoming matches scheduled today.";
+      status.textContent = "No upcoming matches are currently available.";
+      box.innerHTML = "";
       return;
     }
+
+    status.textContent = matches.length + " upcoming match(es) available.";
+
     box.innerHTML = matches.map(match => `
       <div class="match-card">
-        <h3>${escapeHTML(match.home?.name || "Team 1")} vs ${escapeHTML(match.away?.name || "Team 2")}</h3>
+        <span class="tag">UPCOMING FIXTURE</span>
+        <h3>
+          ${escapeHTML(match.home?.name || "Team 1")}
+          vs
+          ${escapeHTML(match.away?.name || "Team 2")}
+        </h3>
         <p>${escapeHTML(match.league?.name || "Cricket")}</p>
         <p>${escapeHTML(formatDate(match.startTime))}</p>
-        <button class="match-button" data-match-id="${escapeHTML(match.id)}">View Match Details</button>
+        <button class="match-button"
+          data-match-id="${escapeHTML(match.id)}">
+          View Match Details
+        </button>
       </div>
     `).join("");
   } catch {
-    box.textContent = "Upcoming matches are temporarily unavailable.";
+    status.textContent = "Upcoming matches are temporarily unavailable.";
+    box.innerHTML = "";
   }
 }
 
+// FULL CRICKET SCORECARD
 async function loadScorecard(matchId) {
   const box = document.getElementById("scorecard-details");
+  if (!box) return;
+
   box.innerHTML = "<p>Loading full scorecard...</p>";
+
   try {
-    const response = await fetch("/api/cricket/scorecard?id=" + encodeURIComponent(matchId));
+    const response = await fetch(
+      "/api/cricket/scorecard?id=" + encodeURIComponent(matchId)
+    );
+
     if (!response.ok) throw new Error();
+
     const result = await response.json();
     const innings = result.data?.innings || [];
+
     if (!Array.isArray(innings) || !innings.length) {
-      box.innerHTML = `<div class="scorecard-innings"><h4>🏏 Full Scorecard</h4><p>Scorecard is not available yet.</p></div>`;
+      box.innerHTML = `
+        <div class="scorecard-innings">
+          <h4>🏏 Full Scorecard</h4>
+          <p>Scorecard is not available yet.</p>
+        </div>
+      `;
       return;
     }
-    box.innerHTML = `<h3>🏏 Full Scorecard</h3>${innings.map((inning,index) => `
-      <div class="scorecard-innings"><h4>Innings ${index + 1}</h4>${renderScorecardValue(inning)}</div>
-    `).join("")}`;
+
+    box.innerHTML = `
+      <h3>🏏 Full Scorecard</h3>
+      ${innings.map((inning,index) => `
+        <div class="scorecard-innings">
+          <h4>Innings ${index + 1}</h4>
+          ${renderScorecardValue(inning)}
+        </div>
+      `).join("")}
+    `;
   } catch {
-    box.innerHTML = `<div class="scorecard-innings"><h4>Scorecard unavailable</h4><p>Please try again later.</p></div>`;
+    box.innerHTML = `
+      <div class="scorecard-innings">
+        <h4>Scorecard unavailable</h4>
+        <p>Please try again later.</p>
+      </div>
+    `;
   }
 }
 
+// MATCH DETAILS
 async function loadMatchDetails(matchId) {
   const box = document.getElementById("match-details");
+
   box.style.display = "block";
   box.innerHTML = "<p>Loading match details...</p>";
-  box.scrollIntoView({ behavior:"smooth",block:"start" });
+  box.scrollIntoView({behavior:"smooth",block:"start"});
 
   try {
-    const response = await fetch("/api/cricket/match?id=" + encodeURIComponent(matchId));
+    const response = await fetch(
+      "/api/cricket/match?id=" + encodeURIComponent(matchId)
+    );
+
     if (!response.ok) throw new Error();
+
     const result = await response.json();
     const match = result.data;
     if (!match) throw new Error();
 
     const home = match.home?.name || "Team 1";
     const away = match.away?.name || "Team 2";
+
     const homeScore = match.homeScore?.current;
     const awayScore = match.awayScore?.current;
+
     const toss = typeof match.toss === "object" && match.toss
-      ? (match.toss.winner === "home" ? home : match.toss.winner === "away" ? away : "Not available") +
-        (match.toss.decision ? " elected to " + match.toss.decision : "")
+      ? (
+          match.toss.winner === "home"
+            ? home
+            : match.toss.winner === "away"
+              ? away
+              : "Not available"
+        ) + (
+          match.toss.decision
+            ? " elected to " + match.toss.decision
+            : ""
+        )
       : match.toss || "Not available yet";
 
     box.innerHTML = `
       <h2>🏏 Match Centre</h2>
       <h3>${escapeHTML(home)} vs ${escapeHTML(away)}</h3>
-      <div class="detail-row"><span class="detail-label">Competition:</span> ${escapeHTML(match.league?.name || "Not available")}</div>
-      <div class="detail-row"><span class="detail-label">Status:</span> ${escapeHTML(match.status?.description || "Not available")}</div>
-      <div class="detail-row"><span class="detail-label">Date and time:</span> ${escapeHTML(formatDate(match.startTime))}</div>
-      <div class="detail-row"><span class="detail-label">Venue:</span> ${escapeHTML(match.venue?.name || "Not available")}</div>
-      <div class="detail-row"><span class="detail-label">City:</span> ${escapeHTML(match.venue?.city || "Not available")}</div>
-      <div class="detail-row"><span class="detail-label">Country:</span> ${escapeHTML(match.venue?.country?.name || "Not available")}</div>
-      <div class="detail-row"><span class="detail-label">Match format:</span> ${escapeHTML(match.matchFormat || "Not available")}</div>
-      <div class="detail-row"><span class="detail-label">Score:</span>
-        ${homeScore != null || awayScore != null
-          ? escapeHTML(home) + ": " + escapeHTML(homeScore ?? "—") + " | " + escapeHTML(away) + ": " + escapeHTML(awayScore ?? "—")
-          : "Score not available yet"}
+
+      <div class="detail-row">
+        <span class="detail-label">Competition:</span>
+        ${escapeHTML(match.league?.name || "Not available")}
       </div>
-      <div class="detail-row"><span class="detail-label">Toss:</span> ${escapeHTML(toss)}</div>
-      <p style="color:#a8b3c7;font-size:13px">Match information is shown as supplied by the data provider.</p>
-      <button class="match-button" id="show-scorecard">View Full Scorecard</button>
-      <div id="scorecard-details"></div><br>
-      <button class="match-button" id="close-details">Close Match Details</button>
+
+      <div class="detail-row">
+        <span class="detail-label">Status:</span>
+        ${escapeHTML(match.status?.description || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Date and time:</span>
+        ${escapeHTML(formatDate(match.startTime))}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Venue:</span>
+        ${escapeHTML(match.venue?.name || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">City:</span>
+        ${escapeHTML(match.venue?.city || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Country:</span>
+        ${escapeHTML(match.venue?.country?.name || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Match format:</span>
+        ${escapeHTML(match.matchFormat || "Not available")}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Score information:</span>
+        ${homeScore != null || awayScore != null
+          ? escapeHTML(home) + ": " + escapeHTML(homeScore ?? "—") +
+            " | " + escapeHTML(away) + ": " + escapeHTML(awayScore ?? "—")
+          : "Not available"}
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-label">Toss:</span>
+        ${escapeHTML(toss)}
+      </div>
+
+      <p style="color:var(--muted);font-size:13px">
+        Match information is shown as supplied by the data provider.
+      </p>
+
+      <button class="match-button" id="show-scorecard">
+        View Full Scorecard
+      </button>
+
+      <div id="scorecard-details"></div>
+      <br>
+
+      <button class="match-button" id="close-details">
+        Close Match Details
+      </button>
     `;
-    document.getElementById("show-scorecard").addEventListener("click", () => loadScorecard(matchId));
-    document.getElementById("close-details").addEventListener("click", () => box.style.display = "none");
+
+    document.getElementById("show-scorecard")
+      .addEventListener("click", () => loadScorecard(matchId));
+
+    document.getElementById("close-details")
+      .addEventListener("click", () => {
+        box.style.display = "none";
+      });
+
   } catch {
-    box.innerHTML = `<h3>Match details unavailable</h3><p>Please try again later.</p><button class="match-button" id="close-details">Close</button>`;
-    document.getElementById("close-details").addEventListener("click", () => box.style.display = "none");
+    box.innerHTML = `
+      <h3>Match details unavailable</h3>
+      <p>Please try again later.</p>
+      <button class="match-button" id="close-details">Close</button>
+    `;
+
+    document.getElementById("close-details")
+      .addEventListener("click", () => {
+        box.style.display = "none";
+      });
   }
 }
 
-document.getElementById("upcoming-matches").addEventListener("click", event => {
-  const button = event.target.closest("[data-match-id]");
-  if (button) loadMatchDetails(button.dataset.matchId);
-});
+// UPCOMING MATCH BUTTONS
+document.getElementById("upcoming-matches")
+  .addEventListener("click", event => {
+    const button = event.target.closest("[data-match-id]");
+    if (button) loadMatchDetails(button.dataset.matchId);
+  });
 
-function formatTeamInnings(score) {
-  const innings = score?.innings || {};
-  const entries = Object.entries(innings);
-  if (!entries.length) return '<div class="live-innings">Yet to bat</div>';
+// ADMIN: RACECARD IMPORT
+document.getElementById("racecard-form")
+  .addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-  return entries.map(([key, inning]) => {
-    const number = key.replace("inning", "");
-    const label = number === "1" ? "1st innings" : number === "2" ? "2nd innings" : "Innings " + number;
-    return `<div class="live-innings">${escapeHTML(label)}: <strong>${escapeHTML(inning.runs ?? "—")}/${escapeHTML(inning.wickets ?? "—")}</strong> (${escapeHTML(inning.overs != null ? inning.overs + " overs" : "Overs unavailable")})</div>`;
-  }).join("");
-}
+    const status = document.getElementById("admin-status");
+    const keyInput = document.getElementById("admin-key");
+    const button = this.querySelector("button[type='submit']");
 
-async function loadCricketScores() {
-  const status = document.getElementById("cricket-status");
-  const matches = document.getElementById("cricket-matches");
-  const refresh = document.getElementById("live-refresh");
+    const adminKey = keyInput.value.trim();
+    const raceDate = document.getElementById("race-date").value;
+    const venue = document.getElementById("race-venue").value.trim();
+    const source = document.getElementById("race-source").value.trim();
+    const text = document.getElementById("race-text").value.trim();
 
-  try {
-    const response = await fetch("/api/cricket/live");
-    if (!response.ok) throw new Error();
-    const result = await response.json();
-    const games = result.data || [];
-
-    if (!games.length) {
-      status.textContent = "No live cricket matches right now. Please check again soon.";
-      matches.innerHTML = "";
-      refresh.textContent = "";
+    if (!adminKey || !raceDate || !venue || !text) {
+      status.textContent = "Please complete all required fields.";
       return;
     }
 
-    status.textContent = games.length + " live match(es)";
-    matches.innerHTML = games.map(match => {
-      const home = match.home?.name || "Team 1";
-      const away = match.away?.name || "Team 2";
-      return `
-        <div class="live-match">
-          <h3>${escapeHTML(home)} vs ${escapeHTML(away)}</h3>
-          <div class="live-meta">
-            ${escapeHTML(match.league?.name || "Cricket")}
-            ${match.venue?.name ? " · " + escapeHTML(match.venue.name) : ""}
-            ${match.venue?.city ? ", " + escapeHTML(match.venue.city) : ""}
-          </div>
-          <div class="live-teams">
-            <div class="live-team">
-              <div class="live-team-name">${escapeHTML(home)}</div>
-              <div class="live-team-total">
-                ${match.homeScore?.current != null && Object.keys(match.homeScore?.innings || {}).length ? escapeHTML(match.homeScore.current) + " runs" : "Yet to bat"}
-              </div>
-              ${formatTeamInnings(match.homeScore)}
-            </div>
-            <div class="live-team">
-              <div class="live-team-name">${escapeHTML(away)}</div>
-              <div class="live-team-total">
-                ${match.awayScore?.current != null && Object.keys(match.awayScore?.innings || {}).length ? escapeHTML(match.awayScore.current) + " runs" : "Yet to bat"}
-              </div>
-              ${formatTeamInnings(match.awayScore)}
-            </div>
-          </div>
-          <div class="live-status">${escapeHTML(match.status?.description || "Live match")}</div>
-        </div>
-      `;
-    }).join("");
-    refresh.textContent = "Live scores refresh automatically every 60 seconds.";
-  } catch {
-    status.textContent = "Live scores are temporarily unavailable.";
-    refresh.textContent = "";
-  }
-}
+    button.disabled = true;
+    status.textContent = "Saving racecard...";
 
-// ADMIN: RACECARD IMPORT
-document.getElementById("racecard-form").addEventListener("submit", async function(event) {
-  event.preventDefault();
-  const status = document.getElementById("admin-status");
-  const keyInput = document.getElementById("admin-key");
-  const button = this.querySelector("button[type='submit']");
-  const adminKey = keyInput.value.trim();
-  const raceDate = document.getElementById("race-date").value;
-  const venue = document.getElementById("race-venue").value.trim();
-  const source = document.getElementById("race-source").value.trim();
-  const text = document.getElementById("race-text").value.trim();
+    try {
+      const response = await fetch("/api/admin/racecard", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + adminKey
+        },
+        body:JSON.stringify({raceDate,venue,source,text})
+      });
 
-  if (!adminKey || !raceDate || !venue || !text) {
-    status.textContent = "Please complete all required fields.";
-    return;
-  }
+      const result = await response.json();
 
-  button.disabled = true;
-  status.textContent = "Saving racecard...";
+      if (!response.ok) {
+        throw new Error(result.error || "Could not save racecard");
+      }
 
-  try {
-    const response = await fetch("/api/admin/racecard", {
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer " + adminKey},
-      body:JSON.stringify({ raceDate,venue,source,text })
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "Could not save racecard");
+      status.textContent =
+        "Success! Racecard saved for administrator review. Reference: " +
+        (result.data?.id || "Saved");
 
-    status.textContent = "Success! Racecard saved for administrator review. Reference: " + result.data.id;
-    document.getElementById("race-text").value = "";
-    document.getElementById("race-source").value = "";
-    keyInput.value = "";
-  } catch (error) {
-    status.textContent = "Error: " + error.message;
-  } finally {
-    button.disabled = false;
-  }
-});
+      document.getElementById("race-text").value = "";
+      document.getElementById("race-source").value = "";
+      keyInput.value = "";
 
-// ADMIN: LOAD RACECARDS
+    } catch (error) {
+      status.textContent = "Error: " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+// ADMIN: LOAD SAVED RACECARDS
 async function loadAdminRacecards() {
   const key = document.getElementById("review-key").value.trim();
   const status = document.getElementById("review-status");
@@ -854,31 +1118,60 @@ async function loadAdminRacecards() {
     const response = await fetch("/api/admin/racecards", {
       headers:{"Authorization":"Bearer " + key}
     });
+
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "Could not load racecards");
+
+    if (!response.ok) {
+      throw new Error(result.error || "Could not load racecards");
+    }
 
     if (!result.data || !result.data.length) {
       status.textContent = "No saved racecards found.";
       return;
     }
 
-    status.textContent = result.count + " saved racecard(s) found.";
+    status.textContent =
+      (result.count ?? result.data.length) + " saved racecard(s) found.";
+
     list.innerHTML = result.data.map(card => `
       <div class="review-card">
-        <h3>🏇 ${escapeHTML(card.venue)}</h3>
+        <h3>🏇 ${escapeHTML(card.venue || "Race Meeting")}</h3>
+
         <p><strong>Race date:</strong> ${escapeHTML(card.raceDate)}</p>
         <p><strong>Country:</strong> ${escapeHTML(card.country || "India")}</p>
         <p><strong>Source:</strong> ${escapeHTML(card.source || "Not supplied")}</p>
-        <p class="review-status">Status: ${escapeHTML(card.status)}</p>
-        <p><small>Imported: ${escapeHTML(card.createdAt)}</small></p>
-        ${card.reviewedAt ? `<p><small>Reviewed: ${escapeHTML(card.reviewedAt)}</small></p>` : ""}
-        <details><summary>Read complete racecard</summary><pre>${escapeHTML(card.text)}</pre></details>
+
+        <p class="review-status">
+          Status: ${escapeHTML(card.status)}
+        </p>
+
+        <p><small>Imported: ${escapeHTML(card.createdAt || "Not available")}</small></p>
+
+        ${card.reviewedAt
+          ? `<p><small>Reviewed: ${escapeHTML(card.reviewedAt)}</small></p>`
+          : ""}
+
+        <details>
+          <summary>Read complete racecard</summary>
+          <pre>${escapeHTML(card.text || "")}</pre>
+        </details>
+
         ${card.status === "pending_review" ? `
-          <button class="match-button" data-review-id="${escapeHTML(card.id)}" data-decision="approved">Approve</button>
-          <button class="match-button" data-review-id="${escapeHTML(card.id)}" data-decision="rejected">Reject</button>
+          <button class="match-button"
+            data-review-id="${escapeHTML(card.id)}"
+            data-decision="approved">
+            Approve
+          </button>
+
+          <button class="match-button"
+            data-review-id="${escapeHTML(card.id)}"
+            data-decision="rejected">
+            Reject
+          </button>
         ` : ""}
       </div>
     `).join("");
+
   } catch (error) {
     status.textContent = "Error: " + error.message;
   } finally {
@@ -886,48 +1179,70 @@ async function loadAdminRacecards() {
   }
 }
 
-// ADMIN: APPROVE OR REJECT
+// ADMIN: APPROVE OR REJECT RACECARD
 async function reviewRacecard(id, decision) {
   const key = document.getElementById("review-key").value.trim();
   const status = document.getElementById("review-status");
+
   if (!key) {
     status.textContent = "Please enter your Admin API Key.";
     return;
   }
 
-  if (!confirm("Are you sure you want to " + decision + " this racecard?")) return;
+  if (!confirm("Are you sure you want to " + decision + " this racecard?")) {
+    return;
+  }
+
   status.textContent = "Updating racecard...";
 
   try {
     const response = await fetch("/api/admin/racecard/review", {
       method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer " + key},
-      body:JSON.stringify({ id,decision })
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer " + key
+      },
+      body:JSON.stringify({id,decision})
     });
+
     const result = await response.json();
-    if (!response.ok) throw new Error(result.error || "Review failed");
-    status.textContent = result.message;
+
+    if (!response.ok) {
+      throw new Error(result.error || "Review failed");
+    }
+
+    status.textContent = result.message || "Racecard updated.";
+
     await loadAdminRacecards();
     await loadApprovedRacecards();
+
   } catch (error) {
     status.textContent = "Error: " + error.message;
   }
 }
 
-document.getElementById("load-racecards").addEventListener("click", loadAdminRacecards);
-document.getElementById("review-list").addEventListener("click", event => {
-  const button = event.target.closest("[data-review-id]");
-  if (!button) return;
-  reviewRacecard(button.dataset.reviewId, button.dataset.decision);
-});
+// ADMIN BUTTONS
+document.getElementById("load-racecards")
+  .addEventListener("click", loadAdminRacecards);
+
+document.getElementById("review-list")
+  .addEventListener("click", event => {
+    const button = event.target.closest("[data-review-id]");
+    if (!button) return;
+
+    reviewRacecard(
+      button.dataset.reviewId,
+      button.dataset.decision
+    );
+  });
 
 // INITIAL PAGE LOAD
 loadUpcomingMatches();
-loadCricketScores();
 loadIndianHorseResults();
 loadApprovedRacecards();
 
-setInterval(loadCricketScores, 60000);
+// No live cricket scores or automatic live-score refresh.
 </script>
+
 </body>
 </html>
