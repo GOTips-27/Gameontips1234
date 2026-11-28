@@ -1203,6 +1203,52 @@ function renderAdminTips(records) {
       </div>
       <p>Status: <strong>${escapeHTML(record.status)}</strong></p>
 
+      <div class="admin-actions">
+        ${record.status === "pending_review" ? `
+          <button class="btn small" data-review="approved"
+            data-id="${escapeHTML(record.id)}">Approve & Publish</button>
+          <button class="btn danger small" data-review="rejected"
+            data-id="${escapeHTML(record.id)}">Reject</button>
+        ` : ""}
+
+        <button class="btn danger small"
+          data-delete="${escapeHTML(record.id)}">
+          Delete Tip
+        </button>
+      </div>
+    </div>
+  `).join("");
+
+  container.querySelectorAll("[data-review]").forEach(button => {
+    button.addEventListener("click", () => {
+      reviewTip(button.dataset.id, button.dataset.review);
+    });
+  });
+
+  container.querySelectorAll("[data-delete]").forEach(button => {
+    button.addEventListener("click", () => {
+      deleteTip(button.dataset.delete);
+    });
+  });
+}
+
+function renderAdminTips(records) {
+  const container = $("adminTipsList");
+
+  if (!records.length) {
+    container.innerHTML = "<p>No tips submitted yet.</p>";
+    return;
+  }
+
+  container.innerHTML = records.map(record => `
+    <div class="editor-item">
+      <strong>${escapeHTML(record.title)}</strong>
+      <div class="meta">
+        ${record.sport === "horse_racing" ? "Indian Horse Racing" : "Cricket"}
+        · ${escapeHTML(formatDate(record.date))}
+      </div>
+      <p>Status: <strong>${escapeHTML(record.status)}</strong></p>
+
       ${record.status === "pending_review" ? `
         <div class="admin-actions">
           <button class="btn small" data-review="approved"
