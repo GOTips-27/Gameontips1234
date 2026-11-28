@@ -164,6 +164,17 @@ header {
 .admin-actions { display:flex;flex-wrap:wrap;gap:8px;margin-top:15px; }
 .status { color:var(--muted);font-size:13px;margin:12px 0;overflow-wrap:anywhere; }
 .hidden { display:none !important; }
+.bulk-help {
+  background:#0d1728;border:1px solid rgba(233,189,98,.3);
+  border-radius:8px;padding:14px;color:#c0cada;font-size:13px;
+}
+.bulk-help strong { color:var(--gold); }
+.bulk-textarea {
+  min-height:230px !important;
+  font-family:monospace !important;
+  font-size:12px !important;
+  line-height:1.5;
+}
 footer { padding:30px 20px;text-align:center;color:var(--muted);font-size:12px; }
 .notice { font-size:12px;color:var(--muted);margin-top:20px; }
 @media(max-width:650px) {
@@ -174,6 +185,7 @@ footer { padding:30px 20px;text-align:center;color:var(--muted);font-size:12px; 
   .tip-card { padding:15px; }
   .form-grid { grid-template-columns:1fr; }
   .sport-banner { height:150px; }
+  .admin-card { padding:15px; }
 }
 </style>
 </head>
@@ -252,9 +264,65 @@ footer { padding:30px 20px;text-align:center;color:var(--muted);font-size:12px; 
     </div>
 
     <div id="adminDashboard" class="hidden">
+
+      <!-- NEW BULK UPLOAD SECTION -->
+      <div class="admin-card">
+        <h3>Bulk Upload Tips</h3>
+        <p class="meta">Upload multiple horse-racing meetings or cricket tips in one request.</p>
+
+        <div class="bulk-help">
+          <strong>How to use:</strong>
+          <ol>
+            <li>Prepare your batch JSON with a top-level <code>tips</code> array.</li>
+            <li>Paste the complete JSON into the box below.</li>
+            <li>Press Upload All Tips.</li>
+            <li>Check Tips Management and approve the tips you want to publish.</li>
+          </ol>
+          Each item in the batch is saved as a separate pending tip. Maximum 50 tips per upload.
+        </div>
+
+        <div class="field">
+          <label for="bulkJson">Paste your complete batch JSON here</label>
+          <textarea id="bulkJson" class="bulk-textarea" placeholder='{
+  "tips": [
+    {
+      "sport": "horse_racing",
+      "title": "Hyderabad Race Meeting Tips",
+      "date": "2026-11-29",
+      "venue": "Hyderabad",
+      "races": [
+        {
+          "raceName": "Race 1",
+          "raceTime": "02:00 PM",
+          "distance": "1200 M",
+          "horses": [
+            {
+              "name": "Example Horse",
+              "rating": "Unrated",
+              "explanation": "Example explanation."
+            }
+          ],
+          "bestSelection": "Example Horse",
+          "reason": "Example reason."
+        }
+      ]
+    }
+  ]
+}'></textarea>
+        </div>
+
+        <div class="admin-actions">
+          <button class="btn secondary" id="validateBulkBtn" type="button">Check JSON</button>
+          <button class="btn" id="bulkUploadBtn" type="button">Upload All Tips</button>
+          <button class="btn danger small" id="clearBulkBtn" type="button">Clear Box</button>
+        </div>
+        <div class="status" id="bulkStatus">No batch uploaded yet.</div>
+      </div>
+
+      <!-- EXISTING INDIVIDUAL SUBMISSION -->
       <div class="admin-card">
         <div class="tip-top">
-          <h3>Submit New Tips</h3>
+          <h3>Submit Individual Tip</h3>
           <button class="btn secondary small" id="logoutBtn" type="button">Logout</button>
         </div>
 
@@ -444,6 +512,106 @@ function renderCricketTip(record) {
     </article>`;
 }
 
+// BULK JSON VALIDATION
+function parseBulkJSON() {
+  const raw = $("bulkJson").value.trim();
+
+  if (!raw) {
+    throw new Error("Paste your batch JSON first.");
+  }
+
+  let parsed;
+
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("The JSON format is invalid. Check commas, quotation marks and brackets.");
+  }
+
+  const tips = Array.isArray(parsed) ? parsed : parsed.tips;
+
+  if (!Array.isArray(tips) || tips.length < 1) {
+    throw new Error('Your JSON must contain a "tips" array with at least one tip.');
+  }
+
+  if (tips.length > 50) {
+    throw new Error("Maximum 50 tips are allowed in one bulk upload.");
+  }
+
+  return { tips };
+}
+
+$("validateBulkBtn").addEventListener("click", () => {
+  try {
+    const batch = parseBulkJSON();
+    $("bulkStatus").textContent =
+      `JSON is valid. ${batch.tips.length} tip(s) detected. Ready to upload.`;
+  } catch(error) {
+    $("bulkStatus").textContent = error.message;
+  }
+});
+
+$("clearBulkBtn").addEventListener("click", () => {
+  if (!confirm("Clear the bulk upload text box?")) return;
+  $("bulkJson").value = "";
+  $("bulkStatus").textContent = "Bulk upload box cleared.";
+});
+
+$("bulkUploadBtn").addEventListener("click", async () => {
+  if (!adminKey) {
+    $("bulkStatus").textContent = "Please log in again.";
+    return;
+  }
+
+  let batch;
+
+  try {
+    batch = parseBulkJSON();
+  } catch(error) {
+    $("bulkStatus").textContent = error.message;
+    return;
+  }
+
+  const confirmed = confirm(
+    `You are about to upload ${batch.tips.length} tip(s). All tips will be saved as pending approval, not published. Continue?`
+  );
+
+  if (!confirmed) return;
+
+  $("bulkUploadBtn").disabled = true;
+  $("bulkStatus").textContent = `Uploading ${batch.tips.length} tip(s). Please wait...`;
+
+  try {
+    const response = await fetch(`${API}/api/admin/tips/bulk`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${adminKey}`
+      },
+      body: JSON.stringify(batch)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Bulk upload failed.");
+    }
+
+    $("bulkStatus").textContent =
+      `Success! ${result.count} tip(s) uploaded. All ${result.pendingApproval} are waiting for your approval.`;
+
+    $("bulkJson").value = "";
+
+    await refreshAdminTips();
+
+  } catch(error) {
+    $("bulkStatus").textContent = error.message;
+  } finally {
+    $("bulkUploadBtn").disabled = false;
+  }
+});
+
+// EXISTING RACE EDITOR
 function addRaceEditor() {
   const id = ++raceCounter;
   const box = document.createElement("div");
@@ -529,19 +697,34 @@ $("sportType").addEventListener("change",()=>{
 $("addRaceBtn").addEventListener("click",addRaceEditor);
 $("addCricketTipBtn").addEventListener("click",addCricketEditor);
 
+// ADMIN LOGIN
 $("loginBtn").addEventListener("click",async()=>{
   const key = $("adminKey").value.trim();
-  if (!key) { $("loginStatus").textContent = "Please enter your admin API key.";return; }
+  if (!key) {
+    $("loginStatus").textContent = "Please enter your admin API key.";
+    return;
+  }
+
   $("loginStatus").textContent = "Checking administrator access...";
+
   try {
-    const response = await fetch(`${API}/api/admin/tips`,{headers:{"Authorization":`Bearer ${key}`}});
+    const response = await fetch(`${API}/api/admin/tips`,{
+      headers:{"Authorization":`Bearer ${key}`}
+    });
+
     const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.error || "Login failed");
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Login failed");
+    }
+
     adminKey = key;
     $("loginCard").classList.add("hidden");
     $("adminDashboard").classList.remove("hidden");
     $("adminKey").value = "";
+
     renderAdminTips(result.data || []);
+
   } catch(error) {
     $("loginStatus").textContent = error.message;
   }
@@ -552,18 +735,38 @@ $("logoutBtn").addEventListener("click",()=>{
   $("adminDashboard").classList.add("hidden");
   $("loginCard").classList.remove("hidden");
   $("adminTipsList").textContent = "Logged out.";
+  $("bulkStatus").textContent = "Please log in to upload tips.";
 });
 
+// INDIVIDUAL TIP SUBMISSION
 $("submitTipBtn").addEventListener("click",async()=>{
-  if (!adminKey) { $("submitStatus").textContent = "Please log in again.";return; }
+  if (!adminKey) {
+    $("submitStatus").textContent = "Please log in again.";
+    return;
+  }
+
   const sport = $("sportType").value;
-  const body = {sport,title:$("tipTitle").value.trim(),date:$("tipDate").value};
-  if (!body.title || !body.date) { $("submitStatus").textContent = "Please enter a title and date.";return; }
+  const body = {
+    sport,
+    title:$("tipTitle").value.trim(),
+    date:$("tipDate").value
+  };
+
+  if (!body.title || !body.date) {
+    $("submitStatus").textContent = "Please enter a title and date.";
+    return;
+  }
 
   if (sport === "horse_racing") {
     const races = [...document.querySelectorAll(".race-editor")];
-    if (!races.length) { $("submitStatus").textContent = "Please add at least one race.";return; }
+
+    if (!races.length) {
+      $("submitStatus").textContent = "Please add at least one race.";
+      return;
+    }
+
     body.venue = $("venue").value.trim();
+
     body.races = races.map(box=>({
       raceName:box.querySelector(".race-name").value.trim(),
       raceTime:box.querySelector(".race-time").value.trim(),
@@ -576,38 +779,76 @@ $("submitTipBtn").addEventListener("click",async()=>{
         explanation:horse.querySelector(".horse-explanation-input").value.trim()
       }))
     }));
-    if (!body.venue) { $("submitStatus").textContent = "Enter the Indian racecourse.";return; }
+
+    if (!body.venue) {
+      $("submitStatus").textContent = "Enter the Indian racecourse.";
+      return;
+    }
+
     for (const race of body.races) {
-      if (!race.raceName || !race.horses.length) { $("submitStatus").textContent = "Every race needs a name and horses.";return; }
-      if (race.horses.some(horse=>!horse.name || !horse.explanation)) { $("submitStatus").textContent = "Every horse needs a name and explanation.";return; }
+      if (!race.raceName || !race.horses.length) {
+        $("submitStatus").textContent = "Every race needs a name and horses.";
+        return;
+      }
+
+      if (race.horses.some(horse=>!horse.name || !horse.explanation)) {
+        $("submitStatus").textContent = "Every horse needs a name and explanation.";
+        return;
+      }
     }
   }
 
   if (sport === "cricket") {
-    body.teams = [$("team1").value.trim(),$("team2").value.trim()];
+    body.teams = [
+      $("team1").value.trim(),
+      $("team2").value.trim()
+    ];
+
     body.analysis = $("matchAnalysis").value.trim();
+
     body.tips = [...document.querySelectorAll(".cricket-editor")].map(box=>({
       category:box.querySelector(".cricket-category").value,
       selection:box.querySelector(".cricket-selection").value.trim(),
       explanation:box.querySelector(".cricket-explanation").value.trim()
     }));
-    if (!body.teams[0] || !body.teams[1] || !body.analysis) { $("submitStatus").textContent = "Enter both teams and match analysis.";return; }
-    if (!body.tips.length || body.tips.some(tip=>!tip.selection || !tip.explanation)) { $("submitStatus").textContent = "Every cricket tip needs a selection and explanation.";return; }
+
+    if (!body.teams[0] || !body.teams[1] || !body.analysis) {
+      $("submitStatus").textContent = "Enter both teams and match analysis.";
+      return;
+    }
+
+    if (!body.tips.length || body.tips.some(tip=>!tip.selection || !tip.explanation)) {
+      $("submitStatus").textContent = "Every cricket tip needs a selection and explanation.";
+      return;
+    }
   }
 
   $("submitTipBtn").disabled = true;
   $("submitStatus").textContent = "Submitting tip for approval...";
+
   try {
     const response = await fetch(`${API}/api/admin/tips`,{
       method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":`Bearer ${adminKey}`},
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${adminKey}`
+      },
       body:JSON.stringify(body)
     });
+
     const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.error || "Could not submit tip");
-    $("submitStatus").textContent = "Successfully submitted. Your tip is waiting for approval.";
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Could not submit tip");
+    }
+
+    $("submitStatus").textContent =
+      "Successfully submitted. Your tip is waiting for approval.";
+
     $("tipTitle").value = "";
+
     await refreshAdminTips();
+
   } catch(error) {
     $("submitStatus").textContent = error.message;
   } finally {
@@ -615,14 +856,25 @@ $("submitTipBtn").addEventListener("click",async()=>{
   }
 });
 
+// ADMIN TIP MANAGEMENT
 async function refreshAdminTips() {
   if (!adminKey) return;
+
   $("adminTipsList").textContent = "Loading tips...";
+
   try {
-    const response = await fetch(`${API}/api/admin/tips`,{headers:{"Authorization":`Bearer ${adminKey}`}});
+    const response = await fetch(`${API}/api/admin/tips`,{
+      headers:{"Authorization":`Bearer ${adminKey}`}
+    });
+
     const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.error || "Could not load tips");
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Could not load tips");
+    }
+
     renderAdminTips(result.data || []);
+
   } catch(error) {
     $("adminTipsList").textContent = error.message;
   }
@@ -630,6 +882,7 @@ async function refreshAdminTips() {
 
 function renderAdminTips(records) {
   const container = $("adminTipsList");
+
   if (!records.length) {
     container.innerHTML = "<p>No tips submitted yet.</p>";
     return;
@@ -655,6 +908,7 @@ function renderAdminTips(records) {
   container.querySelectorAll("[data-review]").forEach(button=>{
     button.addEventListener("click",()=>reviewTip(button.dataset.id,button.dataset.review));
   });
+
   container.querySelectorAll("[data-delete]").forEach(button=>{
     button.addEventListener("click",()=>deleteTip(button.dataset.delete));
   });
@@ -662,17 +916,31 @@ function renderAdminTips(records) {
 
 async function reviewTip(id,decision) {
   if (!adminKey) return;
-  if (decision === "rejected" && !confirm("Are you sure you want to reject this tip?")) return;
+
+  if (
+    decision === "rejected" &&
+    !confirm("Are you sure you want to reject this tip?")
+  ) return;
+
   try {
     const response = await fetch(`${API}/api/admin/tips/review`,{
       method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":`Bearer ${adminKey}`},
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`Bearer ${adminKey}`
+      },
       body:JSON.stringify({id,decision})
     });
+
     const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.error || "Review failed");
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Review failed");
+    }
+
     await refreshAdminTips();
     await loadPublicTips();
+
   } catch(error) {
     alert(error.message);
   }
@@ -680,33 +948,48 @@ async function reviewTip(id,decision) {
 
 async function deleteTip(id) {
   if (!adminKey) return;
+
   if (!confirm("Permanently delete this tip? This cannot be undone.")) return;
+
   try {
-    const response = await fetch(`${API}/api/admin/tips/${encodeURIComponent(id)}`,{
-      method:"DELETE",
-      headers:{"Authorization":`Bearer ${adminKey}`}
-    });
+    const response = await fetch(
+      `${API}/api/admin/tips/${encodeURIComponent(id)}`,
+      {
+        method:"DELETE",
+        headers:{"Authorization":`Bearer ${adminKey}`}
+      }
+    );
+
     const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.error || "Could not delete tip");
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Could not delete tip");
+    }
+
     alert("Tip deleted successfully.");
+
     await refreshAdminTips();
     await loadPublicTips();
+
   } catch(error) {
     alert(error.message);
   }
 }
 
+// DELETE ALL TIPS
 async function deleteAllTips() {
   if (!adminKey) return;
 
   const confirmation = confirm(
     "WARNING: This will permanently delete EVERY horse-racing and cricket tip, including approved and pending tips. Your website and settings will remain. Continue?"
   );
+
   if (!confirmation) return;
 
   const secondConfirmation = prompt(
     "To confirm permanent deletion of ALL tips, type DELETE ALL"
   );
+
   if (secondConfirmation !== "DELETE ALL") {
     alert("Deletion cancelled. No tips were deleted.");
     return;
@@ -719,8 +1002,12 @@ async function deleteAllTips() {
     const response = await fetch(`${API}/api/admin/tips`,{
       headers:{"Authorization":`Bearer ${adminKey}`}
     });
+
     const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.error || "Could not load tips");
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Could not load tips");
+    }
 
     const records = Array.isArray(result.data) ? result.data : [];
     let deleted = 0;
@@ -735,11 +1022,15 @@ async function deleteAllTips() {
             headers:{"Authorization":`Bearer ${adminKey}`}
           }
         );
+
         const deleteResult = await deleteResponse.json();
+
         if (!deleteResponse.ok || !deleteResult.success) {
           throw new Error(deleteResult.error || "Delete failed");
         }
+
         deleted++;
+
       } catch(error) {
         failed.push(record.title || record.id);
       }
@@ -753,9 +1044,11 @@ async function deleteAllTips() {
     } else {
       alert(`Finished. ${deleted} existing tips deleted. Your website and Admin settings remain.`);
     }
+
   } catch(error) {
     $("adminTipsList").textContent = error.message;
     alert(error.message);
+
   } finally {
     $("deleteAllBtn").disabled = false;
   }
@@ -764,6 +1057,7 @@ async function deleteAllTips() {
 $("refreshAdminBtn").addEventListener("click",refreshAdminTips);
 $("deleteAllBtn").addEventListener("click",deleteAllTips);
 
+// INITIAL PAGE SETUP
 addRaceEditor();
 addCricketEditor();
 loadPublicTips();
