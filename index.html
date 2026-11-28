@@ -175,6 +175,21 @@ header {
   font-size:12px !important;
   line-height:1.5;
 }
+.admin-race-preview {
+  margin-top:12px;
+  padding:12px;
+  background:#091322;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.admin-race-preview summary {
+  cursor:pointer;
+  color:var(--gold);
+  font-weight:bold;
+}
+.admin-race-preview summary:hover { color:var(--gold2); }
+.admin-race-preview .race-box { margin-top:14px; }
+.admin-race-preview .best-pick { overflow-wrap:anywhere; }
 footer { padding:30px 20px;text-align:center;color:var(--muted);font-size:12px; }
 .notice { font-size:12px;color:var(--muted);margin-top:20px; }
 @media(max-width:650px) {
@@ -265,7 +280,6 @@ footer { padding:30px 20px;text-align:center;color:var(--muted);font-size:12px; 
 
     <div id="adminDashboard" class="hidden">
 
-      <!-- NEW BULK UPLOAD SECTION -->
       <div class="admin-card">
         <h3>Bulk Upload Tips</h3>
         <p class="meta">Upload multiple horse-racing meetings or cricket tips in one request.</p>
@@ -319,7 +333,6 @@ footer { padding:30px 20px;text-align:center;color:var(--muted);font-size:12px; 
         <div class="status" id="bulkStatus">No batch uploaded yet.</div>
       </div>
 
-      <!-- EXISTING INDIVIDUAL SUBMISSION -->
       <div class="admin-card">
         <div class="tip-top">
           <h3>Submit Individual Tip</h3>
@@ -880,37 +893,134 @@ async function refreshAdminTips() {
   }
 }
 
+// UPDATED ADMIN PREVIEW: SHOWS RACES AND HORSES BEFORE APPROVAL
 function renderAdminTips(records) {
   const container = $("adminTipsList");
 
-  if (!records.length) {
+  if (!Array.isArray(records) || !records.length) {
     container.innerHTML = "<p>No tips submitted yet.</p>";
     return;
   }
 
-  container.innerHTML = records.map(record=>`
-    <div class="editor-item">
-      <strong>${escapeHTML(record.title)}</strong>
-      <div class="meta">
-        ${record.sport === "horse_racing" ? "Indian Horse Racing" : "Cricket"}
-        · ${escapeHTML(formatDate(record.date))}
-      </div>
-      <p>Status: <strong>${escapeHTML(record.status)}</strong></p>
-      <div class="admin-actions">
-        ${record.status === "pending_review" ? `
-          <button class="btn small" data-review="approved" data-id="${escapeHTML(record.id)}">Approve & Publish</button>
-          <button class="btn danger small" data-review="rejected" data-id="${escapeHTML(record.id)}">Reject</button>
-        ` : ""}
-        <button class="btn danger small" data-delete="${escapeHTML(record.id)}">Delete Tip</button>
-      </div>
-    </div>`).join("");
+  container.innerHTML = records.map(record => {
+    const content = record.content || {};
+    const races = Array.isArray(content.races) ? content.races : [];
+    const cricketTips = Array.isArray(content.tips) ? content.tips : [];
 
-  container.querySelectorAll("[data-review]").forEach(button=>{
-    button.addEventListener("click",()=>reviewTip(button.dataset.id,button.dataset.review));
+    const racePreview = races.map((race, index) => {
+      const horses = Array.isArray(race.horses) ? race.horses : [];
+
+      return `
+        <div class="race-box">
+          <h4>${escapeHTML(race.raceName || `Race ${index + 1}`)}</h4>
+
+          <div class="meta">
+            ${escapeHTML(race.raceTime || "")}
+            ${race.distance ? " · " + escapeHTML(race.distance) : ""}
+          </div>
+
+          <p><strong>Declared horses: ${horses.length}</strong></p>
+
+          ${horses.length ? horses.map((horse, horseIndex) => `
+            <div class="horse-row">
+              <div class="horse-name">
+                ${horseIndex + 1}. ${escapeHTML(horse.name || "Unnamed horse")}
+                <span class="rating ${ratingClass(horse.rating)}">
+                  ${escapeHTML(horse.rating || "Unrated")}
+                </span>
+              </div>
+              <div class="horse-explanation">
+                ${escapeHTML(horse.explanation || "No explanation provided.")}
+              </div>
+            </div>
+          `).join("") : "<p>No horse details found in this race.</p>"}
+
+          <div class="best-pick">
+            <strong>Best Selection:</strong>
+            ${escapeHTML(race.bestSelection || "Not provided")}
+            <div class="horse-explanation">
+              ${escapeHTML(race.reason || "No selection explanation provided.")}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    const isHorseRacing = record.sport === "horse_racing";
+
+    return `
+      <div class="editor-item">
+        <h4>${escapeHTML(record.title || "Untitled tip")}</h4>
+
+        <div class="meta">
+          ${isHorseRacing ? "Indian Horse Racing" : "Cricket"}
+          · ${escapeHTML(formatDate(record.date))}
+        </div>
+
+        <p>Status: <strong>${escapeHTML(record.status || "Unknown")}</strong></p>
+
+        ${isHorseRacing ? `
+          <p>
+            Venue: ${escapeHTML(content.venue || "Not provided")}
+            · ${races.length} races
+            · ${races.reduce((total, race) =>
+                total + (Array.isArray(race.horses) ? race.horses.length : 0), 0
+              )} declared horses
+          </p>
+
+          <details class="admin-race-preview">
+            <summary>View all ${races.length} races and horse selections</summary>
+            ${racePreview || "<p>No race details found in the saved record.</p>"}
+          </details>
+        ` : `
+          <details class="admin-race-preview">
+            <summary>View cricket tip details</summary>
+            <p>${escapeHTML(content.analysis || "No match analysis provided.")}</p>
+            ${(content.teams || []).length ? `
+              <p><strong>Teams:</strong> ${escapeHTML(content.teams.join(" vs "))}</p>
+            ` : ""}
+            ${cricketTips.map(tip => `
+              <div class="horse-row">
+                <strong>${escapeHTML(tip.category || "Selection")}</strong>
+                <p>${escapeHTML(tip.selection || "")}</p>
+                <div class="horse-explanation">
+                  ${escapeHTML(tip.explanation || "No explanation provided.")}
+                </div>
+              </div>
+            `).join("")}
+          </details>
+        `}
+
+        <div class="admin-actions">
+          ${record.status === "pending_review" ? `
+            <button class="btn small" data-review="approved"
+              data-id="${escapeHTML(record.id)}">
+              Approve & Publish
+            </button>
+            <button class="btn danger small" data-review="rejected"
+              data-id="${escapeHTML(record.id)}">
+              Reject
+            </button>
+          ` : ""}
+          <button class="btn danger small"
+            data-delete="${escapeHTML(record.id)}">
+            Delete Tip
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  container.querySelectorAll("[data-review]").forEach(button => {
+    button.addEventListener("click", () =>
+      reviewTip(button.dataset.id, button.dataset.review)
+    );
   });
 
-  container.querySelectorAll("[data-delete]").forEach(button=>{
-    button.addEventListener("click",()=>deleteTip(button.dataset.delete));
+  container.querySelectorAll("[data-delete]").forEach(button => {
+    button.addEventListener("click", () =>
+      deleteTip(button.dataset.delete)
+    );
   });
 }
 
@@ -921,6 +1031,9 @@ async function reviewTip(id,decision) {
     decision === "rejected" &&
     !confirm("Are you sure you want to reject this tip?")
   ) return;
+
+  if (decision === "approved" &&
+      !confirm("Are you sure you have checked these tips and want to publish them?")) return;
 
   try {
     const response = await fetch(`${API}/api/admin/tips/review`,{
