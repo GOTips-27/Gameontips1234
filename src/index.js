@@ -88,6 +88,223 @@ export default {
       return records;
     };
 
+    // VALIDATE AND PREPARE ONE TIP
+    const prepareTip = body => {
+      if (!body || typeof body !== "object" || Array.isArray(body)) {
+        return { error: "Each tip must be a valid object" };
+      }
+
+      const sport = cleanText(body.sport, 30);
+      const title = cleanText(body.title, 200);
+      const tipDate = cleanText(body.date, 10);
+
+      if (!["horse_racing", "cricket"].includes(sport)) {
+        return {
+          error: "Sport must be horse_racing or cricket"
+        };
+      }
+
+      if (!title) {
+        return { error: "A title is required" };
+      }
+
+      if (!validDate(tipDate)) {
+        return {
+          error: "Date must use YYYY-MM-DD format"
+        };
+      }
+
+      let content;
+
+      // INDIAN HORSE RACING VALIDATION
+      if (sport === "horse_racing") {
+        const venue = cleanText(body.venue, 100);
+        const races = body.races;
+
+        if (!venue) {
+          return {
+            error: "Indian racecourse or venue is required"
+          };
+        }
+
+        if (
+          !Array.isArray(races) ||
+          races.length < 1 ||
+          races.length > 30
+        ) {
+          return {
+            error: "Add between 1 and 30 races"
+          };
+        }
+
+        const cleanedRaces = [];
+
+        for (let i = 0; i < races.length; i++) {
+          const race = races[i];
+
+          if (!race || typeof race !== "object") {
+            return {
+              error: `Race ${i + 1} must be a valid object`
+            };
+          }
+
+          const raceName = cleanText(race.raceName, 150);
+          const horses = race.horses;
+
+          if (!raceName) {
+            return {
+              error: `Race ${i + 1} needs a race name`
+            };
+          }
+
+          if (
+            !Array.isArray(horses) ||
+            horses.length < 1 ||
+            horses.length > 100
+          ) {
+            return {
+              error: `Add the horses for ${raceName}`
+            };
+          }
+
+          const cleanedHorses = [];
+
+          for (const horse of horses) {
+            if (!horse || typeof horse !== "object") {
+              return {
+                error: `Invalid horse entry in ${raceName}`
+              };
+            }
+
+            const name = cleanText(horse.name, 100);
+            const rating = cleanText(horse.rating, 40);
+            const explanation = cleanText(
+              horse.explanation,
+              1500
+            );
+
+            if (!name || !explanation) {
+              return {
+                error: `Every horse in ${raceName} needs a name and explanation`
+              };
+            }
+
+            cleanedHorses.push({
+              name,
+              rating: rating || "Unrated",
+              explanation
+            });
+          }
+
+          const bestSelection = cleanText(
+            race.bestSelection,
+            100
+          );
+
+          if (
+            bestSelection &&
+            !cleanedHorses.some(
+              horse =>
+                horse.name.toLowerCase() ===
+                bestSelection.toLowerCase()
+            )
+          ) {
+            return {
+              error: `Best selection for ${raceName} must match a horse listed in that race`
+            };
+          }
+
+          cleanedRaces.push({
+            raceName,
+            raceTime: cleanText(race.raceTime, 30),
+            distance: cleanText(race.distance, 50),
+            horses: cleanedHorses,
+            bestSelection,
+            reason: cleanText(race.reason, 2000)
+          });
+        }
+
+        content = {
+          venue,
+          races: cleanedRaces
+        };
+      }
+
+      // CRICKET VALIDATION
+      if (sport === "cricket") {
+        const teams = Array.isArray(body.teams)
+          ? body.teams
+              .slice(0, 2)
+              .map(team => cleanText(team, 100))
+              .filter(Boolean)
+          : [];
+
+        const analysis = cleanText(body.analysis, 10000);
+        const tips = body.tips;
+
+        if (teams.length !== 2) {
+          return {
+            error: "Enter both cricket teams"
+          };
+        }
+
+        if (!analysis) {
+          return {
+            error: "Cricket match analysis is required"
+          };
+        }
+
+        if (
+          !Array.isArray(tips) ||
+          tips.length < 1 ||
+          tips.length > 30
+        ) {
+          return {
+            error: "Add between 1 and 30 cricket tips"
+          };
+        }
+
+        const cleanedTips = tips.map(tip => ({
+          category: cleanText(tip.category, 100),
+          selection: cleanText(tip.selection, 200),
+          explanation: cleanText(tip.explanation, 2000)
+        }));
+
+        if (
+          cleanedTips.some(
+            tip => !tip.selection || !tip.explanation
+          )
+        ) {
+          return {
+            error: "Every cricket tip needs a selection and explanation"
+          };
+        }
+
+        content = {
+          teams,
+          analysis,
+          tips: cleanedTips
+        };
+      }
+
+      const id = crypto.randomUUID();
+      const now = new Date().toISOString();
+
+      // ALL NEW TIPS ARE PENDING APPROVAL
+      const record = {
+        id,
+        sport,
+        title,
+        date: tipDate,
+        content,
+        status: "pending_review",
+        createdAt: now,
+        reviewedAt: null
+      };
+
+      return { record };
+    };
+
     // HEALTH CHECK
     if (path === "/api/health" && method === "GET") {
       return json({
@@ -100,219 +317,94 @@ export default {
       });
     }
 
-    // ADMIN: CREATE A NEW TIP
+    // ADMIN: BULK UPLOAD MULTIPLE TIPS
+    // POST /api/admin/tips/bulk
+    if (
+      path === "/api/admin/tips/bulk" &&
+      method === "POST"
+    ) {
+      const authError = requireAdmin();
+      if (authError) return authError;
+
+      try {
+        const body = await request.json();
+        const tips = body && body.tips;
+
+        if (
+          !Array.isArray(tips) ||
+          tips.length < 1 ||
+          tips.length > 50
+        ) {
+          return json({
+            error: "Submit between 1 and 50 tips in the tips array"
+          }, 400);
+        }
+
+        // Validate every tip before saving any of them
+        const preparedRecords = [];
+
+        for (let i = 0; i < tips.length; i++) {
+          const result = prepareTip(tips[i]);
+
+          if (result.error) {
+            return json({
+              error: `Tip ${i + 1}: ${result.error}`,
+              failedTip: i + 1,
+              saved: 0
+            }, 400);
+          }
+
+          preparedRecords.push(result.record);
+        }
+
+        // Save all prepared tips to the existing KV database
+        try {
+          await Promise.all(
+            preparedRecords.map(record =>
+              env.RACE_CARDS.put(
+                `tip:${record.id}`,
+                JSON.stringify(record)
+              )
+            )
+          );
+        } catch {
+          return json({
+            error: "Bulk save failed. Some tips may have been saved. Check the Admin panel before retrying."
+          }, 500);
+        }
+
+        return json({
+          success: true,
+          message: "Bulk upload completed. All tips are waiting for administrator approval.",
+          count: preparedRecords.length,
+          pendingApproval: preparedRecords.length,
+          data: preparedRecords
+        }, 201);
+
+      } catch {
+        return json({
+          error: "Invalid JSON or could not process bulk upload"
+        }, 400);
+      }
+    }
+
+    // ADMIN: CREATE ONE TIP
     if (path === "/api/admin/tips" && method === "POST") {
       const authError = requireAdmin();
       if (authError) return authError;
 
       try {
         const body = await request.json();
+        const result = prepareTip(body);
 
-        const sport = cleanText(body.sport, 30);
-        const title = cleanText(body.title, 200);
-        const tipDate = cleanText(body.date, 10);
-
-        if (!["horse_racing", "cricket"].includes(sport)) {
-          return json({
-            error: "Sport must be horse_racing or cricket"
-          }, 400);
+        if (result.error) {
+          return json({ error: result.error }, 400);
         }
 
-        if (!title) {
-          return json({ error: "A title is required" }, 400);
-        }
-
-        if (!validDate(tipDate)) {
-          return json({
-            error: "Date must use YYYY-MM-DD format"
-          }, 400);
-        }
-
-        let content;
-
-        // INDIAN HORSE RACING TIP VALIDATION
-        if (sport === "horse_racing") {
-          const venue = cleanText(body.venue, 100);
-          const races = body.races;
-
-          if (!venue) {
-            return json({
-              error: "Indian racecourse or venue is required"
-            }, 400);
-          }
-
-          if (
-            !Array.isArray(races) ||
-            races.length < 1 ||
-            races.length > 30
-          ) {
-            return json({
-              error: "Add at least one race"
-            }, 400);
-          }
-
-          const cleanedRaces = [];
-
-          for (let i = 0; i < races.length; i++) {
-            const race = races[i];
-
-            const raceName = cleanText(
-              race.raceName,
-              150
-            );
-
-            const horses = race.horses;
-
-            if (!raceName) {
-              return json({
-                error: `Race ${i + 1} needs a race name`
-              }, 400);
-            }
-
-            if (
-              !Array.isArray(horses) ||
-              horses.length < 1 ||
-              horses.length > 100
-            ) {
-              return json({
-                error: `Add the horses for ${raceName}`
-              }, 400);
-            }
-
-            const cleanedHorses = [];
-
-            for (const horse of horses) {
-              const name = cleanText(horse.name, 100);
-              const rating = cleanText(horse.rating, 40);
-              const explanation = cleanText(
-                horse.explanation,
-                1500
-              );
-
-              if (!name || !explanation) {
-                return json({
-                  error: `Every horse in ${raceName} needs a name and explanation`
-                }, 400);
-              }
-
-              cleanedHorses.push({
-                name,
-                rating: rating || "Unrated",
-                explanation
-              });
-            }
-
-            const bestSelection = cleanText(
-              race.bestSelection,
-              100
-            );
-
-            if (
-              bestSelection &&
-              !cleanedHorses.some(
-                horse =>
-                  horse.name.toLowerCase() ===
-                  bestSelection.toLowerCase()
-              )
-            ) {
-              return json({
-                error: `Best selection for ${raceName} must match a horse listed in that race`
-              }, 400);
-            }
-
-            cleanedRaces.push({
-              raceName,
-              raceTime: cleanText(race.raceTime, 30),
-              distance: cleanText(race.distance, 50),
-              horses: cleanedHorses,
-              bestSelection,
-              reason: cleanText(race.reason, 2000)
-            });
-          }
-
-          content = {
-            venue,
-            races: cleanedRaces
-          };
-        }
-
-        // CRICKET TIP VALIDATION
-        if (sport === "cricket") {
-          const teams = Array.isArray(body.teams)
-            ? body.teams
-                .slice(0, 2)
-                .map(team => cleanText(team, 100))
-                .filter(Boolean)
-            : [];
-
-          const analysis = cleanText(
-            body.analysis,
-            10000
-          );
-
-          const tips = body.tips;
-
-          if (teams.length !== 2) {
-            return json({
-              error: "Enter both cricket teams"
-            }, 400);
-          }
-
-          if (!analysis) {
-            return json({
-              error: "Cricket match analysis is required"
-            }, 400);
-          }
-
-          if (
-            !Array.isArray(tips) ||
-            tips.length < 1 ||
-            tips.length > 30
-          ) {
-            return json({
-              error: "Add at least one cricket tip"
-            }, 400);
-          }
-
-          const cleanedTips = tips.map(tip => ({
-            category: cleanText(tip.category, 100),
-            selection: cleanText(tip.selection, 200),
-            explanation: cleanText(tip.explanation, 2000)
-          }));
-
-          if (
-            cleanedTips.some(
-              tip => !tip.selection || !tip.explanation
-            )
-          ) {
-            return json({
-              error: "Every cricket tip needs a selection and explanation"
-            }, 400);
-          }
-
-          content = {
-            teams,
-            analysis,
-            tips: cleanedTips
-          };
-        }
-
-        const id = crypto.randomUUID();
-        const now = new Date().toISOString();
-
-        const record = {
-          id,
-          sport,
-          title,
-          date: tipDate,
-          content,
-          status: "pending_review",
-          createdAt: now,
-          reviewedAt: null
-        };
+        const record = result.record;
 
         await env.RACE_CARDS.put(
-          `tip:${id}`,
+          `tip:${record.id}`,
           JSON.stringify(record)
         );
 
@@ -411,6 +503,7 @@ export default {
         }, 400);
       }
     }
+
     // ADMIN: PERMANENTLY DELETE ONE TIP
     const deleteMatch = path.match(
       /^\/api\/admin\/tips\/([a-f0-9-]{36})$/i
@@ -453,6 +546,7 @@ export default {
         }, 500);
       }
     }
+
     // PUBLIC: APPROVED TIPS ONLY
     if (path === "/api/tips" && method === "GET") {
       if (!env.RACE_CARDS) {
