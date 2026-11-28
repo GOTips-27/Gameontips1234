@@ -411,7 +411,48 @@ export default {
         }, 400);
       }
     }
+    // ADMIN: PERMANENTLY DELETE ONE TIP
+    const deleteMatch = path.match(
+      /^\/api\/admin\/tips\/([a-f0-9-]{36})$/i
+    );
 
+    if (deleteMatch && method === "DELETE") {
+      const authError = requireAdmin();
+      if (authError) return authError;
+
+      try {
+        const id = deleteMatch[1];
+        const key = `tip:${id}`;
+
+        const record = await env.RACE_CARDS.get(
+          key,
+          "json"
+        );
+
+        if (!record) {
+          return json({
+            error: "Tip not found"
+          }, 404);
+        }
+
+        await env.RACE_CARDS.delete(key);
+
+        return json({
+          success: true,
+          message: "Tip deleted successfully",
+          deletedTip: {
+            id: record.id,
+            title: record.title,
+            date: record.date
+          }
+        });
+
+      } catch {
+        return json({
+          error: "Could not delete tip"
+        }, 500);
+      }
+    }
     // PUBLIC: APPROVED TIPS ONLY
     if (path === "/api/tips" && method === "GET") {
       if (!env.RACE_CARDS) {
