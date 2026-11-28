@@ -1,5 +1,39 @@
 
 export default {
+  // DAILY CRON CHECK
+  // Confirms the 09:00 India-time schedule is reaching the Worker.
+  // Racecard collection will be added in the next development stage.
+  async scheduled(controller, env, ctx) {
+    const status = {
+      success: true,
+      task: "cron_heartbeat",
+      message: "Daily schedule ran. Automatic racecard collection is not enabled yet.",
+      cron: controller && controller.cron ? controller.cron : "30 3 * * *",
+      scheduledAt: controller && controller.scheduledTime
+        ? new Date(controller.scheduledTime).toISOString()
+        : null,
+      ranAt: new Date().toISOString(),
+      racecardsCollected: 0,
+      tipsCreated: 0
+    };
+
+    if (!env.RACE_CARDS) {
+      console.error("Cron ran, but RACE_CARDS KV is not configured.");
+      return;
+    }
+
+    try {
+      await env.RACE_CARDS.put(
+        "collector:status",
+        JSON.stringify(status)
+      );
+      console.log("GameOnTips1234 daily cron heartbeat saved.");
+    } catch (error) {
+      console.error("Could not save cron heartbeat:", error);
+      throw error;
+    }
+  },
+
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
@@ -304,6 +338,37 @@ export default {
 
       return { record };
     };
+
+    // ADMIN: CHECK DAILY AUTOMATION STATUS
+    if (
+      path === "/api/admin/collector/status" &&
+      method === "GET"
+    ) {
+      const authError = requireAdmin();
+      if (authError) return authError;
+
+      try {
+        const lastRun = await env.RACE_CARDS.get(
+          "collector:status",
+          "json"
+        );
+
+        return json({
+          success: true,
+          cron: "30 3 * * *",
+          timezone: "UTC (03:30 UTC = 09:00 India Standard Time)",
+          automaticRacecardCollectionEnabled: false,
+          message: lastRun
+            ? "The daily Cron has run. Racecard collection is the next development step."
+            : "Waiting for the first Cron run. Racecard collection is not enabled yet.",
+          lastRun
+        });
+      } catch {
+        return json({
+          error: "Could not read automation status"
+        }, 500);
+      }
+    }
 
     // HEALTH CHECK
     if (path === "/api/health" && method === "GET") {
